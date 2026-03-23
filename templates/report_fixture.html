@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixture Schedule - {{ project.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+    <style>
+        .color-dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="report-body">
+    <div class="report">
+        <div class="report-header">
+            <h1>Fixture Schedule</h1>
+            <div class="report-meta">
+                <p><strong>Project:</strong> {{ project.name }}</p>
+                {% if project.address %}<p><strong>Address:</strong> {{ project.address }}</p>{% endif %}
+                <p><strong>Date:</strong> {{ now }}</p>
+            </div>
+        </div>
+
+        {% if project.recessed %}
+        <div class="report-section">
+            <h2>Recessed Fixtures</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Color</th>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>CCT</th>
+                        <th>Beam</th>
+                        <th>Control</th>
+                        <th>Housing P/N</th>
+                        <th>Module P/N</th>
+                        <th>Trim P/N</th>
+                        <th>Driver P/N</th>
+                        <th class="num">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.recessed %}
+                    <tr>
+                        <td>{% if f.color %}{% for c in fixture_colors %}{% if c.value == f.color %}<span class="color-dot" style="background:{{ c.hex }}" title="{{ c.label }}"></span>{% endif %}{% endfor %}{% endif %}</td>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}</td>
+                        <td>{{ f.fixture_type }}</td>
+                        <td>{{ f.cct }}</td>
+                        <td>{{ f.beam_spread }}</td>
+                        <td>{{ f.control_type }}</td>
+                        <td>{{ f.housing_part_no }}{% if f.housing_approved_date %}<br><span class="approval-note">Approved {{ f.housing_approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.module_part_no }}{% if f.module_approved_date %}<br><span class="approval-note">Approved {{ f.module_approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.trim_part_no }}{% if f.trim_approved_date %}<br><span class="approval-note">Approved {{ f.trim_approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.driver_part_no }}{% if f.driver_approved_date %}<br><span class="approval-note">Approved {{ f.driver_approved_date }}</span>{% endif %}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.linear %}
+        <div class="report-section">
+            <h2>Linear Fixtures</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Color</th>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>CCT</th>
+                        <th>Channel Type</th>
+                        <th>Control</th>
+                        <th>Tape P/N</th>
+                        <th>Driver P/N</th>
+                        <th>Channel P/N</th>
+                        <th class="num">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.linear %}
+                    <tr>
+                        <td>{% if f.color %}{% for c in fixture_colors %}{% if c.value == f.color %}<span class="color-dot" style="background:{{ c.hex }}" title="{{ c.label }}"></span>{% endif %}{% endfor %}{% endif %}</td>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}</td>
+                        <td>{{ f.cct }}</td>
+                        <td>{{ f.channel_type }}</td>
+                        <td>{{ f.control_type }}</td>
+                        <td>{{ f.tape_part_no }}{% if f.tape_approved_date %}<br><span class="approval-note">Approved {{ f.tape_approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.driver_part_no }}{% if f.driver_approved_date %}<br><span class="approval-note">Approved {{ f.driver_approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.channel_part_no }}{% if f.channel_approved_date %}<br><span class="approval-note">Approved {{ f.channel_approved_date }}</span>{% endif %}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.decorative %}
+        <div class="report-section">
+            <h2>Decorative Fixtures</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>CCT</th>
+                        <th>Lamp Type</th>
+                        <th class="num">Lamp Qty</th>
+                        <th>Part #</th>
+                        <th class="num">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.decorative %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}{% if f.approved_date %}<br><span class="approval-note">Approved {{ f.approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.fixture_type }}</td>
+                        <td>{{ f.cct }}</td>
+                        <td>{{ f.lamp_type }}</td>
+                        <td class="num">{{ f.lamp_quantity }}</td>
+                        <td>{{ f.part_no }}{% if f.approved_date %}<br><span class="approval-note">Approved {{ f.approved_date }}</span>{% endif %}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.landscape %}
+        <div class="report-section">
+            <h2>Landscape Fixtures</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Color</th>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>CCT</th>
+                        <th>Wattage</th>
+                        <th>Finish</th>
+                        <th>Control</th>
+                        <th>Mount P/N</th>
+                        <th>Fixture P/N</th>
+                        <th>Lamp P/N</th>
+                        <th>Accessory P/N</th>
+                        <th class="num">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.landscape %}
+                    <tr>
+                        <td>{% if f.color %}{% for c in fixture_colors %}{% if c.value == f.color %}<span class="color-dot" style="background:{{ c.hex }}" title="{{ c.label }}"></span>{% endif %}{% endfor %}{% endif %}</td>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}</td>
+                        <td>{{ f.fixture_type }}</td>
+                        <td>{{ f.cct }}</td>
+                        <td>{{ f.wattage }}</td>
+                        <td>{{ f.finish }}</td>
+                        <td>{{ f.control_type }}</td>
+                        <td>{{ f.mount_part_no }}{% if f.mount_approved_date %}<br><span class="approval-note">Approved {{ f.mount_approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.fixture_part_no }}{% if f.fixture_approved_date %}<br><span class="approval-note">Approved {{ f.fixture_approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.lamp_part_no }}{% if f.lamp_approved_date %}<br><span class="approval-note">Approved {{ f.lamp_approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.accessory_part_no }}{% if f.accessory_approved_date %}<br><span class="approval-note">Approved {{ f.accessory_approved_date }}</span>{% endif %}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.accessories %}
+        <div class="report-section">
+            <h2>Landscape Accessories</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Part #</th>
+                        <th class="num">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.accessories %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}{% if f.approved_date %}<br><span class="approval-note">Approved {{ f.approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.part_no }}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.transformers %}
+        <div class="report-section">
+            <h2>Transformers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Wattage</th>
+                        <th>Control</th>
+                        <th>Part #</th>
+                        <th class="num">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.transformers %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}{% if f.approved_date %}<br><span class="approval-note">Approved {{ f.approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.wattage }}</td>
+                        <td>{{ f.control_type }}</td>
+                        <td>{{ f.part_no }}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <div class="report-footer">
+            <button class="btn btn-primary no-print" onclick="window.print()">Print / Save as PDF</button>
+            <a href="/project/{{ project.id }}" class="btn btn-secondary no-print">Back to Editor</a>
+        </div>
+    </div>
+</body>
+</html>

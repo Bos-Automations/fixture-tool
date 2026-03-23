@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.db
+.DS_Store
+.claude/
+venv/
+.env
+node_modules/
+.vercel/

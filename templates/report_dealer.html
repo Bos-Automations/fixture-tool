@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dealer Pricing - {{ project.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}">
+    <style>
+        .fixture-header-row td {
+            background: #f8fafc;
+            font-weight: 600;
+            border-top: 2px solid #cbd5e1;
+            padding-top: 10px;
+        }
+        .component-row td {
+            padding-left: 24px;
+            font-size: 0.78rem;
+        }
+        .component-label {
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.03em;
+        }
+    </style>
+</head>
+<body class="report-body">
+    <div class="report">
+        <div class="report-header">
+            <h1>Dealer Pricing Report</h1>
+            <div class="report-meta">
+                <p><strong>Project:</strong> {{ project.name }}</p>
+                {% if project.address %}<p><strong>Address:</strong> {{ project.address }}</p>{% endif %}
+                <p><strong>Date:</strong> {{ now }}</p>
+            </div>
+        </div>
+
+        {% if project.recessed %}
+        <div class="report-section">
+            <h2>Recessed Fixtures</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Component</th>
+                        <th>Part Number</th>
+                        <th class="num">Price</th>
+                        <th class="status-col">Status</th>
+                        <th class="num">Qty</th>
+                        <th class="num">Extended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.recessed %}
+                    {% set unit = (f.housing_dealer_price or 0) + (f.module_dealer_price or 0) + (f.trim_dealer_price or 0) + (f.driver_dealer_price or 0) %}
+                    <tr class="fixture-header-row">
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }} &middot; {{ f.fixture_type }} &middot; {{ f.cct }} &middot; {{ f.control_type }}</td>
+                        <td></td>
+                        <td></td>
+                        <td class="num">{{ unit | currency }}</td>
+                        <td></td>
+                        <td class="num">{{ f.quantity }}</td>
+                        <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
+                    </tr>
+                    {% if f.housing_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Housing</span></td>
+                        <td>{{ f.housing_part_no }}</td>
+                        <td class="num">{{ f.housing_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.housing_status | lower | replace(' ', '-') }}">{{ f.housing_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if f.module_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Module</span></td>
+                        <td>{{ f.module_part_no }}</td>
+                        <td class="num">{{ f.module_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.module_status | lower | replace(' ', '-') }}">{{ f.module_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if f.trim_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Trim</span></td>
+                        <td>{{ f.trim_part_no }}</td>
+                        <td class="num">{{ f.trim_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.trim_status | lower | replace(' ', '-') }}">{{ f.trim_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if f.driver_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Driver</span></td>
+                        <td>{{ f.driver_part_no }}</td>
+                        <td class="num">{{ f.driver_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.driver_status | lower | replace(' ', '-') }}">{{ f.driver_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.linear %}
+        <div class="report-section">
+            <h2>Linear Fixtures</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Component</th>
+                        <th>Part Number</th>
+                        <th class="num">Price</th>
+                        <th class="status-col">Status</th>
+                        <th class="num">Qty</th>
+                        <th class="num">Extended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.linear %}
+                    {% set unit = (f.tape_dealer_price or 0) + (f.driver_dealer_price or 0) + (f.channel_dealer_price or 0) %}
+                    <tr class="fixture-header-row">
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }} &middot; {{ f.cct }} &middot; {{ f.channel_type }} &middot; {{ f.control_type }}</td>
+                        <td></td>
+                        <td></td>
+                        <td class="num">{{ unit | currency }}</td>
+                        <td></td>
+                        <td class="num">{{ f.quantity }}</td>
+                        <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
+                    </tr>
+                    {% if f.tape_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">LED Tape</span></td>
+                        <td>{{ f.tape_part_no }}</td>
+                        <td class="num">{{ f.tape_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.tape_status | lower | replace(' ', '-') }}">{{ f.tape_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if f.driver_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Driver</span></td>
+                        <td>{{ f.driver_part_no }}</td>
+                        <td class="num">{{ f.driver_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.driver_status | lower | replace(' ', '-') }}">{{ f.driver_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if f.channel_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Channel</span></td>
+                        <td>{{ f.channel_part_no }}</td>
+                        <td class="num">{{ f.channel_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.channel_status | lower | replace(' ', '-') }}">{{ f.channel_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.decorative %}
+        <div class="report-section">
+            <h2>Decorative Fixtures</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Type</th>
+                        <th>CCT</th>
+                        <th>Lamp</th>
+                        <th class="status-col">Status</th>
+                        <th class="num">Qty</th>
+                        <th class="num">Dealer $</th>
+                        <th class="num">Extended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.decorative %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}</td>
+                        <td>{{ f.fixture_type }}</td>
+                        <td>{{ f.cct }}</td>
+                        <td>{{ f.lamp_type }} ({{ f.lamp_quantity }})</td>
+                        <td><span class="status-badge status-{{ f.status | lower | replace(' ', '-') }}">{{ f.status or '—' }}</span></td>
+                        <td class="num">{{ f.quantity }}</td>
+                        <td class="num">{{ f.dealer_price | currency }}</td>
+                        <td class="num">{{ ((f.dealer_price or 0) * (f.quantity or 1)) | currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.landscape %}
+        <div class="report-section">
+            <h2>Landscape Fixtures</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Component</th>
+                        <th>Part Number</th>
+                        <th class="num">Price</th>
+                        <th class="status-col">Status</th>
+                        <th class="num">Qty</th>
+                        <th class="num">Extended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.landscape %}
+                    {% set unit = (f.mount_dealer_price or 0) + (f.fixture_dealer_price or 0) + (f.lamp_dealer_price or 0) + (f.accessory_dealer_price or 0) %}
+                    <tr class="fixture-header-row">
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }} &middot; {{ f.fixture_type }} &middot; {{ f.cct }} &middot; {{ f.wattage }} &middot; {{ f.control_type }}</td>
+                        <td></td>
+                        <td></td>
+                        <td class="num">{{ unit | currency }}</td>
+                        <td></td>
+                        <td class="num">{{ f.quantity }}</td>
+                        <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
+                    </tr>
+                    {% if f.mount_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Mount</span></td>
+                        <td>{{ f.mount_part_no }}</td>
+                        <td class="num">{{ f.mount_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.mount_status | lower | replace(' ', '-') }}">{{ f.mount_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if f.fixture_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Fixture</span></td>
+                        <td>{{ f.fixture_part_no }}</td>
+                        <td class="num">{{ f.fixture_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.fixture_status | lower | replace(' ', '-') }}">{{ f.fixture_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if f.lamp_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Lamp</span></td>
+                        <td>{{ f.lamp_part_no }}</td>
+                        <td class="num">{{ f.lamp_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.lamp_status | lower | replace(' ', '-') }}">{{ f.lamp_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if f.accessory_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Accessory</span></td>
+                        <td>{{ f.accessory_part_no }}</td>
+                        <td class="num">{{ f.accessory_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.accessory_status | lower | replace(' ', '-') }}">{{ f.accessory_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.accessories %}
+        <div class="report-section">
+            <h2>Landscape Accessories</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th class="status-col">Status</th>
+                        <th class="num">Qty</th>
+                        <th class="num">Dealer $</th>
+                        <th class="num">Extended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.accessories %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}</td>
+                        <td><span class="status-badge status-{{ f.status | lower | replace(' ', '-') }}">{{ f.status or '—' }}</span></td>
+                        <td class="num">{{ f.quantity }}</td>
+                        <td class="num">{{ f.dealer_price | currency }}</td>
+                        <td class="num">{{ ((f.dealer_price or 0) * (f.quantity or 1)) | currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.transformers %}
+        <div class="report-section">
+            <h2>Transformers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th>Wattage</th>
+                        <th>Control</th>
+                        <th class="status-col">Status</th>
+                        <th class="num">Qty</th>
+                        <th class="num">Dealer $</th>
+                        <th class="num">Extended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.transformers %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}</td>
+                        <td>{{ f.wattage }}</td>
+                        <td>{{ f.control_type }}</td>
+                        <td><span class="status-badge status-{{ f.status | lower | replace(' ', '-') }}">{{ f.status or '—' }}</span></td>
+                        <td class="num">{{ f.quantity }}</td>
+                        <td class="num">{{ f.dealer_price | currency }}</td>
+                        <td class="num">{{ ((f.dealer_price or 0) * (f.quantity or 1)) | currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <div class="report-totals">
+            <table class="totals-table">
+                <tr><td>Subtotal</td><td class="num">{{ totals.subtotal | currency }}</td></tr>
+                <tr class="total-row"><td><strong>Total</strong></td><td class="num"><strong>{{ totals.subtotal | currency }}</strong></td></tr>
+            </table>
+        </div>
+
+        <div class="report-footer">
+            <button class="btn btn-primary no-print" onclick="window.print()">Print / Save as PDF</button>
+            <a href="/project/{{ project.id }}" class="btn btn-secondary no-print">Back to Editor</a>
+        </div>
+    </div>
+</body>
+</html>
