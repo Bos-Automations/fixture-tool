@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 from datetime import date, datetime
 import database as db
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='public/static')
 
 DECORATIVE_TYPES = [
     'Sconce', 'Chandelier', 'Pendant', 'Flush Mount', 'Semi-Flush',
