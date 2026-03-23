@@ -235,19 +235,7 @@ def api_delete_fixture(table, fixture_id):
     return jsonify({'ok': True})
 
 
-_init_error = None
-try:
-    db.init_db()
-except Exception as e:
-    _init_error = str(e)
-
-
-@app.route('/health')
-def health():
-    if _init_error:
-        return jsonify({'status': 'error', 'init_error': _init_error}), 500
-    return jsonify({'status': 'ok'})
-
+db.init_db()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
