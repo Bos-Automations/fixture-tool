@@ -52,6 +52,22 @@ body {
 .save-status-saved { color: #86efac; }
 .save-status-saving { color: #fde68a; }
 .save-status-error { color: #fca5a5; }
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.nav-logout {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+.nav-logout:hover {
+    color: white;
+    background: rgba(255,255,255,0.1);
+}
 
 /* === Container === */
 .container {

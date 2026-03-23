@@ -10,7 +10,10 @@
 <body>
     <nav class="top-nav">
         <a href="/" class="nav-brand">Fixture Tool</a>
-        {% block nav_right %}{% endblock %}
+        <div class="nav-right">
+            {% block nav_right %}{% endblock %}
+            <a href="/logout" class="nav-logout">Logout</a>
+        </div>
     </nav>
     <main class="container">
         {% block content %}{% endblock %}

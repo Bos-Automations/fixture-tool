@@ -239,7 +239,7 @@ function updateStatusDots(row) {
         const comp = dot.dataset.component;
         let statusField;
         if (comp === 'fixture') {
-            statusField = row.querySelector('[data-field="status"]');
+            statusField = row.querySelector('[data-field="status"]') || row.querySelector('[data-field="fixture_status"]');
         } else {
             statusField = row.querySelector('[data-field="' + comp + '_status"]');
         }
