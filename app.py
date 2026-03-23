@@ -235,6 +235,7 @@ def api_delete_fixture(table, fixture_id):
     return jsonify({'ok': True})
 
 
+db.init_db()
+
 if __name__ == '__main__':
-    db.init_db()
     app.run(debug=True, port=5001)
