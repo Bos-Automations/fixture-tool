@@ -28,10 +28,12 @@
                         <th>Description</th>
                         <th>Type</th>
                         <th>CCT</th>
+                        <th>Beam</th>
+                        <th>Trim Type</th>
+                        <th>Trim Color</th>
                         <th>Control</th>
                         <th class="num">Qty</th>
-                        <th class="num">Unit Total</th>
-                        <th class="num">Extended</th>
+                        <th class="num">Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,9 +44,11 @@
                         <td>{{ f.description }}</td>
                         <td>{{ f.fixture_type }}</td>
                         <td>{{ f.cct }}</td>
+                        <td>{{ f.beam_spread }}</td>
+                        <td>{{ f.trim_style }}</td>
+                        <td>{{ f.trim_color }}</td>
                         <td>{{ f.control_type }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ unit | currency }}</td>
                         <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
@@ -62,8 +66,7 @@
                         <th>ID</th>
                         <th>Description</th>
                         <th class="num">Qty</th>
-                        <th class="num">List $</th>
-                        <th class="num">Extended</th>
+                        <th class="num">Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -72,7 +75,6 @@
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ f.list_price | currency }}</td>
                         <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
@@ -93,8 +95,7 @@
                         <th>Ch. Type</th>
                         <th>Control</th>
                         <th class="num">Qty</th>
-                        <th class="num">Unit Total</th>
-                        <th class="num">Extended</th>
+                        <th class="num">Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -107,7 +108,6 @@
                         <td>{{ f.channel_type }}</td>
                         <td>{{ f.control_type }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ unit | currency }}</td>
                         <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
@@ -125,8 +125,7 @@
                         <th>ID</th>
                         <th>Description</th>
                         <th class="num">Qty</th>
-                        <th class="num">List $</th>
-                        <th class="num">Extended</th>
+                        <th class="num">Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -135,7 +134,6 @@
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ f.list_price | currency }}</td>
                         <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
@@ -157,8 +155,7 @@
                         <th>Lamp</th>
                         <th class="num">Lamp Qty</th>
                         <th class="num">Qty</th>
-                        <th class="num">List $</th>
-                        <th class="num">Extended</th>
+                        <th class="num">Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -171,7 +168,6 @@
                         <td>{{ f.lamp_type }}</td>
                         <td class="num">{{ f.lamp_quantity }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ f.list_price | currency }}</td>
                         <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
@@ -189,8 +185,7 @@
                         <th>ID</th>
                         <th>Description</th>
                         <th class="num">Qty</th>
-                        <th class="num">List $</th>
-                        <th class="num">Extended</th>
+                        <th class="num">Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -199,7 +194,6 @@
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ f.list_price | currency }}</td>
                         <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
@@ -218,11 +212,12 @@
                         <th>Description</th>
                         <th>Type</th>
                         <th>CCT</th>
+                        <th>Beam</th>
                         <th>Wattage</th>
+                        <th>Finish</th>
                         <th>Control</th>
                         <th class="num">Qty</th>
-                        <th class="num">Unit Total</th>
-                        <th class="num">Extended</th>
+                        <th class="num">Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -233,10 +228,11 @@
                         <td>{{ f.description }}</td>
                         <td>{{ f.fixture_type }}</td>
                         <td>{{ f.cct }}</td>
+                        <td>{{ f.beam_spread }}</td>
                         <td>{{ f.wattage }}</td>
+                        <td>{{ f.finish }}</td>
                         <td>{{ f.control_type }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ unit | currency }}</td>
                         <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
@@ -254,8 +250,7 @@
                         <th>ID</th>
                         <th>Description</th>
                         <th class="num">Qty</th>
-                        <th class="num">List $</th>
-                        <th class="num">Extended</th>
+                        <th class="num">Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -264,7 +259,6 @@
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ f.list_price | currency }}</td>
                         <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
@@ -284,8 +278,7 @@
                         <th>Wattage</th>
                         <th>Control</th>
                         <th class="num">Qty</th>
-                        <th class="num">List $</th>
-                        <th class="num">Extended</th>
+                        <th class="num">Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -296,7 +289,6 @@
                         <td>{{ f.wattage }}</td>
                         <td>{{ f.control_type }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ f.list_price | currency }}</td>
                         <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}

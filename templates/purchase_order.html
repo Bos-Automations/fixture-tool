@@ -187,6 +187,21 @@
                 </div>
                 {% endif %}
 
+                {% if project.recessed_accessories %}
+                <div class="po-fixture-group">
+                    <h3>Recessed Accessories</h3>
+                    {% for f in project.recessed_accessories %}
+                    {% if f.part_no %}
+                    <div class="po-item">
+                        <label><input type="checkbox" class="po-check" data-type="recessed-accessory" data-fixture-id="{{ f.fixture_id }}" data-desc="{{ f.description }}" data-component="Accessory" data-part="{{ f.part_no }}" data-qty="{{ f.quantity }}" data-dealer="{{ f.dealer_price }}" data-list="{{ f.list_price }}">
+                        {{ f.fixture_id }} — {{ f.description }}</label>
+                        <span class="po-price">D: {{ f.dealer_price | currency }} / L: {{ f.list_price | currency }}</span>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
                 {% if project.linear %}
                 <div class="po-fixture-group">
                     <h3>Linear Fixtures</h3>
@@ -213,6 +228,21 @@
                         <label><input type="checkbox" class="po-check" data-type="linear" data-fixture-id="{{ f.fixture_id }}" data-desc="{{ f.description }}" data-component="Channel" data-part="{{ f.channel_part_no }}" data-qty="{{ f.quantity }}" data-dealer="{{ f.channel_dealer_price }}" data-list="{{ f.channel_list_price }}">
                         Channel: {{ f.channel_part_no }}</label>
                         <span class="po-price">D: {{ f.channel_dealer_price | currency }} / L: {{ f.channel_list_price | currency }}</span>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if project.linear_accessories %}
+                <div class="po-fixture-group">
+                    <h3>Linear Accessories</h3>
+                    {% for f in project.linear_accessories %}
+                    {% if f.part_no %}
+                    <div class="po-item">
+                        <label><input type="checkbox" class="po-check" data-type="linear-accessory" data-fixture-id="{{ f.fixture_id }}" data-desc="{{ f.description }}" data-component="Accessory" data-part="{{ f.part_no }}" data-qty="{{ f.quantity }}" data-dealer="{{ f.dealer_price }}" data-list="{{ f.list_price }}">
+                        {{ f.fixture_id }} — {{ f.description }}</label>
+                        <span class="po-price">D: {{ f.dealer_price | currency }} / L: {{ f.list_price | currency }}</span>
                     </div>
                     {% endif %}
                     {% endfor %}
@@ -280,6 +310,21 @@
                     {% if f.part_no %}
                     <div class="po-item">
                         <label><input type="checkbox" class="po-check" data-type="accessory" data-fixture-id="{{ f.fixture_id }}" data-desc="{{ f.description }}" data-component="Accessory" data-part="{{ f.part_no }}" data-qty="{{ f.quantity }}" data-dealer="{{ f.dealer_price }}" data-list="{{ f.list_price }}">
+                        {{ f.fixture_id }} — {{ f.description }}</label>
+                        <span class="po-price">D: {{ f.dealer_price | currency }} / L: {{ f.list_price | currency }}</span>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if project.decorative_accessories %}
+                <div class="po-fixture-group">
+                    <h3>Decorative Accessories</h3>
+                    {% for f in project.decorative_accessories %}
+                    {% if f.part_no %}
+                    <div class="po-item">
+                        <label><input type="checkbox" class="po-check" data-type="decorative-accessory" data-fixture-id="{{ f.fixture_id }}" data-desc="{{ f.description }}" data-component="Accessory" data-part="{{ f.part_no }}" data-qty="{{ f.quantity }}" data-dealer="{{ f.dealer_price }}" data-list="{{ f.list_price }}">
                         {{ f.fixture_id }} — {{ f.description }}</label>
                         <span class="po-price">D: {{ f.dealer_price | currency }} / L: {{ f.list_price | currency }}</span>
                     </div>
