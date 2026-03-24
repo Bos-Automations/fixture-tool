@@ -36,7 +36,7 @@
                 </thead>
                 <tbody>
                     {% for f in project.recessed %}
-                    {% set unit = (f.housing_list_price or 0) + (f.module_list_price or 0) + (f.trim_list_price or 0) + (f.driver_list_price or 0) + (f.accessory_list_price or 0) %}
+                    {% set unit = (f.housing_list_price or 0) + (f.module_list_price or 0) + (f.trim_list_price or 0) + (f.driver_list_price or 0) %}
                     <tr>
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }}</td>
@@ -46,6 +46,34 @@
                         <td class="num">{{ f.quantity }}</td>
                         <td class="num">{{ unit | currency }}</td>
                         <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.recessed_accessories %}
+        <div class="report-section">
+            <h2>Recessed Accessories</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th class="num">Qty</th>
+                        <th class="num">List $</th>
+                        <th class="num">Extended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.recessed_accessories %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                        <td class="num">{{ f.list_price | currency }}</td>
+                        <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -71,7 +99,7 @@
                 </thead>
                 <tbody>
                     {% for f in project.linear %}
-                    {% set unit = (f.tape_list_price or 0) + (f.driver_list_price or 0) + (f.channel_list_price or 0) + (f.accessory_list_price or 0) %}
+                    {% set unit = (f.tape_list_price or 0) + (f.driver_list_price or 0) + (f.channel_list_price or 0) %}
                     <tr>
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }}</td>
@@ -81,6 +109,34 @@
                         <td class="num">{{ f.quantity }}</td>
                         <td class="num">{{ unit | currency }}</td>
                         <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.linear_accessories %}
+        <div class="report-section">
+            <h2>Linear Accessories</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th class="num">Qty</th>
+                        <th class="num">List $</th>
+                        <th class="num">Extended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.linear_accessories %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                        <td class="num">{{ f.list_price | currency }}</td>
+                        <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -101,13 +157,12 @@
                         <th>Lamp</th>
                         <th class="num">Lamp Qty</th>
                         <th class="num">Qty</th>
-                        <th class="num">Unit Total</th>
+                        <th class="num">List $</th>
                         <th class="num">Extended</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for f in project.decorative %}
-                    {% set unit = (f.list_price or 0) + (f.accessory_list_price or 0) %}
                     <tr>
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }}</td>
@@ -116,8 +171,36 @@
                         <td>{{ f.lamp_type }}</td>
                         <td class="num">{{ f.lamp_quantity }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ unit | currency }}</td>
-                        <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
+                        <td class="num">{{ f.list_price | currency }}</td>
+                        <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.decorative_accessories %}
+        <div class="report-section">
+            <h2>Decorative Accessories</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Description</th>
+                        <th class="num">Qty</th>
+                        <th class="num">List $</th>
+                        <th class="num">Extended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in project.decorative_accessories %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                        <td class="num">{{ f.list_price | currency }}</td>
+                        <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

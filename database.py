@@ -10,7 +10,8 @@ TURSO_URL = os.environ.get('TURSO_DATABASE_URL', '')
 TURSO_AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN', '')
 
 VALID_TABLES = {'recessed_fixtures', 'linear_fixtures', 'decorative_fixtures',
-                 'landscape_fixtures', 'landscape_transformers', 'landscape_accessories'}
+                 'landscape_fixtures', 'landscape_transformers', 'landscape_accessories',
+                 'recessed_accessories', 'linear_accessories', 'decorative_accessories'}
 
 TABLE_COLUMNS = {
     'recessed_fixtures': {
@@ -23,8 +24,6 @@ TABLE_COLUMNS = {
         'trim_approved_date',
         'driver_part_no', 'driver_dealer_price', 'driver_list_price', 'driver_status',
         'driver_approved_date',
-        'accessory_part_no', 'accessory_dealer_price', 'accessory_list_price', 'accessory_status',
-        'accessory_approved_date',
         'cct', 'beam_spread', 'fixture_type', 'control_type', 'color',
         'trim_style', 'trim_color', 'sort_order',
     },
@@ -36,17 +35,12 @@ TABLE_COLUMNS = {
         'driver_approved_date',
         'channel_part_no', 'channel_dealer_price', 'channel_list_price', 'channel_status',
         'channel_approved_date',
-        'accessory_part_no', 'accessory_dealer_price', 'accessory_list_price', 'accessory_status',
-        'accessory_approved_date',
         'cct', 'channel_type', 'control_type', 'color', 'sort_order',
     },
     'decorative_fixtures': {
         'fixture_id', 'description', 'quantity',
         'fixture_type', 'lamp_type', 'lamp_quantity', 'cct',
-        'part_no', 'dealer_price', 'list_price', 'status', 'approved_date',
-        'accessory_part_no', 'accessory_dealer_price', 'accessory_list_price', 'accessory_status',
-        'accessory_approved_date',
-        'sort_order',
+        'part_no', 'dealer_price', 'list_price', 'status', 'approved_date', 'sort_order',
     },
     'landscape_fixtures': {
         'fixture_id', 'description', 'quantity',
@@ -68,6 +62,21 @@ TABLE_COLUMNS = {
         'sort_order',
     },
     'landscape_accessories': {
+        'fixture_id', 'description', 'quantity',
+        'part_no', 'dealer_price', 'list_price', 'status', 'approved_date',
+        'sort_order',
+    },
+    'recessed_accessories': {
+        'fixture_id', 'description', 'quantity',
+        'part_no', 'dealer_price', 'list_price', 'status', 'approved_date',
+        'sort_order',
+    },
+    'linear_accessories': {
+        'fixture_id', 'description', 'quantity',
+        'part_no', 'dealer_price', 'list_price', 'status', 'approved_date',
+        'sort_order',
+    },
+    'decorative_accessories': {
         'fixture_id', 'description', 'quantity',
         'part_no', 'dealer_price', 'list_price', 'status', 'approved_date',
         'sort_order',
@@ -211,11 +220,6 @@ _CREATE_TABLES = [
         driver_list_price REAL DEFAULT 0,
         driver_status TEXT DEFAULT '',
         driver_approved_date TEXT DEFAULT '',
-        accessory_part_no TEXT DEFAULT '',
-        accessory_dealer_price REAL DEFAULT 0,
-        accessory_list_price REAL DEFAULT 0,
-        accessory_status TEXT DEFAULT '',
-        accessory_approved_date TEXT DEFAULT '',
         cct TEXT DEFAULT '',
         beam_spread TEXT DEFAULT '',
         fixture_type TEXT DEFAULT 'Fixed',
@@ -246,11 +250,6 @@ _CREATE_TABLES = [
         channel_list_price REAL DEFAULT 0,
         channel_status TEXT DEFAULT '',
         channel_approved_date TEXT DEFAULT '',
-        accessory_part_no TEXT DEFAULT '',
-        accessory_dealer_price REAL DEFAULT 0,
-        accessory_list_price REAL DEFAULT 0,
-        accessory_status TEXT DEFAULT '',
-        accessory_approved_date TEXT DEFAULT '',
         cct TEXT DEFAULT '',
         channel_type TEXT DEFAULT '',
         control_type TEXT DEFAULT '',
@@ -272,11 +271,6 @@ _CREATE_TABLES = [
         list_price REAL DEFAULT 0,
         status TEXT DEFAULT '',
         approved_date TEXT DEFAULT '',
-        accessory_part_no TEXT DEFAULT '',
-        accessory_dealer_price REAL DEFAULT 0,
-        accessory_list_price REAL DEFAULT 0,
-        accessory_status TEXT DEFAULT '',
-        accessory_approved_date TEXT DEFAULT '',
         quantity INTEGER DEFAULT 1,
         sort_order INTEGER DEFAULT 0
     )""",
@@ -337,6 +331,45 @@ _CREATE_TABLES = [
         description TEXT DEFAULT '',
         wattage TEXT DEFAULT '',
         control_type TEXT DEFAULT '',
+        part_no TEXT DEFAULT '',
+        dealer_price REAL DEFAULT 0,
+        list_price REAL DEFAULT 0,
+        status TEXT DEFAULT '',
+        approved_date TEXT DEFAULT '',
+        quantity INTEGER DEFAULT 1,
+        sort_order INTEGER DEFAULT 0
+    )""",
+    """CREATE TABLE IF NOT EXISTS recessed_accessories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        project_id INTEGER NOT NULL,
+        fixture_id TEXT DEFAULT '',
+        description TEXT DEFAULT '',
+        part_no TEXT DEFAULT '',
+        dealer_price REAL DEFAULT 0,
+        list_price REAL DEFAULT 0,
+        status TEXT DEFAULT '',
+        approved_date TEXT DEFAULT '',
+        quantity INTEGER DEFAULT 1,
+        sort_order INTEGER DEFAULT 0
+    )""",
+    """CREATE TABLE IF NOT EXISTS linear_accessories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        project_id INTEGER NOT NULL,
+        fixture_id TEXT DEFAULT '',
+        description TEXT DEFAULT '',
+        part_no TEXT DEFAULT '',
+        dealer_price REAL DEFAULT 0,
+        list_price REAL DEFAULT 0,
+        status TEXT DEFAULT '',
+        approved_date TEXT DEFAULT '',
+        quantity INTEGER DEFAULT 1,
+        sort_order INTEGER DEFAULT 0
+    )""",
+    """CREATE TABLE IF NOT EXISTS decorative_accessories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        project_id INTEGER NOT NULL,
+        fixture_id TEXT DEFAULT '',
+        description TEXT DEFAULT '',
         part_no TEXT DEFAULT '',
         dealer_price REAL DEFAULT 0,
         list_price REAL DEFAULT 0,
@@ -424,6 +457,15 @@ def get_project(project_id):
     )["rows"]
     project['accessories'] = _execute(
         'SELECT * FROM landscape_accessories WHERE project_id = ? ORDER BY sort_order, id', [project_id]
+    )["rows"]
+    project['recessed_accessories'] = _execute(
+        'SELECT * FROM recessed_accessories WHERE project_id = ? ORDER BY sort_order, id', [project_id]
+    )["rows"]
+    project['linear_accessories'] = _execute(
+        'SELECT * FROM linear_accessories WHERE project_id = ? ORDER BY sort_order, id', [project_id]
+    )["rows"]
+    project['decorative_accessories'] = _execute(
+        'SELECT * FROM decorative_accessories WHERE project_id = ? ORDER BY sort_order, id', [project_id]
     )["rows"]
     return project
 

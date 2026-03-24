@@ -280,8 +280,11 @@ async function duplicateFixture(btn) {
     // Determine list type from table name
     const tableToListType = {
         'recessed_fixtures': 'recessed',
+        'recessed_accessories': 'recessed-accessory',
         'linear_fixtures': 'linear',
+        'linear_accessories': 'linear-accessory',
         'decorative_fixtures': 'decorative',
+        'decorative_accessories': 'decorative-accessory',
         'landscape_fixtures': 'landscape',
         'landscape_transformers': 'transformer',
         'landscape_accessories': 'accessory'
@@ -360,8 +363,11 @@ function buildFixtureRow(type, fixture) {
 function initExistingFixtures() {
     const types = {
         recessed: { data: PROJECT_DATA.recessed },
+        'recessed-accessory': { data: PROJECT_DATA.recessed_accessories },
         linear: { data: PROJECT_DATA.linear },
+        'linear-accessory': { data: PROJECT_DATA.linear_accessories },
         decorative: { data: PROJECT_DATA.decorative },
+        'decorative-accessory': { data: PROJECT_DATA.decorative_accessories },
         landscape: { data: PROJECT_DATA.landscape },
         transformer: { data: PROJECT_DATA.transformers },
         accessory: { data: PROJECT_DATA.accessories }

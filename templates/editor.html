@@ -48,6 +48,10 @@
         <div class="fixture-list" id="list-recessed">
         </div>
         <button class="btn btn-add" onclick="addFixture('recessed_fixtures', 'recessed')">+ Add Recessed Fixture</button>
+        <div style="height:12px"></div>
+        <div class="fixture-list" id="list-recessed-accessory">
+        </div>
+        <button class="btn btn-add" onclick="addFixture('recessed_accessories', 'recessed-accessory')">+ Add Accessory</button>
     </div>
 
     <!-- Linear Fixtures -->
@@ -55,6 +59,10 @@
         <div class="fixture-list" id="list-linear">
         </div>
         <button class="btn btn-add" onclick="addFixture('linear_fixtures', 'linear')">+ Add Linear Fixture</button>
+        <div style="height:12px"></div>
+        <div class="fixture-list" id="list-linear-accessory">
+        </div>
+        <button class="btn btn-add" onclick="addFixture('linear_accessories', 'linear-accessory')">+ Add Accessory</button>
     </div>
 
     <!-- Decorative Fixtures -->
@@ -62,6 +70,10 @@
         <div class="fixture-list" id="list-decorative">
         </div>
         <button class="btn btn-add" onclick="addFixture('decorative_fixtures', 'decorative')">+ Add Decorative Fixture</button>
+        <div style="height:12px"></div>
+        <div class="fixture-list" id="list-decorative-accessory">
+        </div>
+        <button class="btn btn-add" onclick="addFixture('decorative_accessories', 'decorative-accessory')">+ Add Accessory</button>
     </div>
 
     <!-- Landscape Fixtures -->
@@ -102,7 +114,6 @@
                 <span class="status-dot" data-component="module" title="Module"></span>
                 <span class="status-dot" data-component="trim" title="Trim"></span>
                 <span class="status-dot" data-component="driver" title="Driver"></span>
-                <span class="status-dot" data-component="accessory" title="Accessory"></span>
             </div>
             <span class="expand-icon">&#9660;</span>
         </div>
@@ -201,20 +212,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="detail-section" data-component-section="accessory">
-                    <h4>Accessory <span class="approved-date-display" data-date-for="accessory_approved_date"></span></h4>
-                    <div class="field-row">
-                        <div class="form-group"><label>Part #</label><input type="text" data-field="accessory_part_no" value="" data-lockable="accessory"></div>
-                        <div class="form-group"><label>Dealer $</label><input type="number" step="0.01" inputmode="decimal" data-field="accessory_dealer_price" value="0" data-lockable="accessory"></div>
-                        <div class="form-group"><label>List $</label><input type="number" step="0.01" inputmode="decimal" data-field="accessory_list_price" value="0" data-lockable="accessory"></div>
-                        <div class="form-group"><label>Status</label>
-                            <select data-field="accessory_status" class="status-select">
-                                {% for s in status_options %}<option value="{{ s }}">{{ s or '—' }}</option>{% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="fixture-actions">
                 <button class="btn btn-secondary btn-sm" onclick="duplicateFixture(this)">Duplicate</button>
@@ -236,7 +233,6 @@
                 <span class="status-dot" data-component="tape" title="Tape"></span>
                 <span class="status-dot" data-component="driver" title="Driver"></span>
                 <span class="status-dot" data-component="channel" title="Channel"></span>
-                <span class="status-dot" data-component="accessory" title="Accessory"></span>
             </div>
             <span class="expand-icon">&#9660;</span>
         </div>
@@ -312,20 +308,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="detail-section" data-component-section="accessory">
-                    <h4>Accessory <span class="approved-date-display" data-date-for="accessory_approved_date"></span></h4>
-                    <div class="field-row">
-                        <div class="form-group"><label>Part #</label><input type="text" data-field="accessory_part_no" value="" data-lockable="accessory"></div>
-                        <div class="form-group"><label>Dealer $</label><input type="number" step="0.01" inputmode="decimal" data-field="accessory_dealer_price" value="0" data-lockable="accessory"></div>
-                        <div class="form-group"><label>List $</label><input type="number" step="0.01" inputmode="decimal" data-field="accessory_list_price" value="0" data-lockable="accessory"></div>
-                        <div class="form-group"><label>Status</label>
-                            <select data-field="accessory_status" class="status-select">
-                                {% for s in status_options %}<option value="{{ s }}">{{ s or '—' }}</option>{% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="fixture-actions">
                 <button class="btn btn-secondary btn-sm" onclick="duplicateFixture(this)">Duplicate</button>
@@ -345,7 +327,6 @@
             <span class="fixture-qty-display">Qty: __QTY__</span>
             <div class="status-dots">
                 <span class="status-dot" data-component="fixture" title="Fixture"></span>
-                <span class="status-dot" data-component="accessory" title="Accessory"></span>
             </div>
             <span class="expand-icon">&#9660;</span>
         </div>
@@ -384,20 +365,6 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="detail-section" data-component-section="accessory">
-                    <h4>Accessory <span class="approved-date-display" data-date-for="accessory_approved_date"></span></h4>
-                    <div class="field-row">
-                        <div class="form-group"><label>Part #</label><input type="text" data-field="accessory_part_no" value="" data-lockable="accessory"></div>
-                        <div class="form-group"><label>Dealer $</label><input type="number" step="0.01" inputmode="decimal" data-field="accessory_dealer_price" value="0" data-lockable="accessory"></div>
-                        <div class="form-group"><label>List $</label><input type="number" step="0.01" inputmode="decimal" data-field="accessory_list_price" value="0" data-lockable="accessory"></div>
-                        <div class="form-group"><label>Status</label>
-                            <select data-field="accessory_status" class="status-select">
-                                {% for s in status_options %}<option value="{{ s }}">{{ s or '—' }}</option>{% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="fixture-actions">
                 <button class="btn btn-secondary btn-sm" onclick="duplicateFixture(this)">Duplicate</button>
@@ -431,6 +398,141 @@
                     </div>
                 </div>
 
+                <div class="detail-section" data-component-section="fixture">
+                    <h4>Accessory <span class="approved-date-display" data-date-for="approved_date"></span></h4>
+                    <div class="field-row">
+                        <div class="form-group"><label>Part #</label><input type="text" data-field="part_no" value="" data-lockable="fixture"></div>
+                        <div class="form-group"><label>Dealer $</label><input type="number" step="0.01" inputmode="decimal" data-field="dealer_price" value="0" data-lockable="fixture"></div>
+                        <div class="form-group"><label>List $</label><input type="number" step="0.01" inputmode="decimal" data-field="list_price" value="0" data-lockable="fixture"></div>
+                        <div class="form-group"><label>Status</label>
+                            <select data-field="status" class="status-select">
+                                {% for s in status_options %}<option value="{{ s }}">{{ s or '—' }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="fixture-actions">
+                <button class="btn btn-secondary btn-sm" onclick="duplicateFixture(this)">Duplicate</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteFixture(this)">Delete</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Recessed accessory template -->
+<template id="tpl-recessed-accessory">
+    <div class="fixture-row" data-table="recessed_accessories" data-id="__ID__">
+        <div class="fixture-summary" onclick="toggleExpand(this)">
+            <span class="drag-handle" title="Drag to reorder">&#9776;</span>
+            <span class="fixture-id-display">__FIXTURE_ID__</span>
+            <span class="fixture-desc-display">__DESCRIPTION__</span>
+            <span class="fixture-qty-display">Qty: __QTY__</span>
+            <div class="status-dots">
+                <span class="status-dot" data-component="fixture" title="Accessory"></span>
+            </div>
+            <span class="expand-icon">&#9660;</span>
+        </div>
+        <div class="fixture-detail">
+            <div class="detail-grid">
+                <div class="detail-section detail-section-basic">
+                    <h4>General</h4>
+                    <div class="field-row">
+                        <div class="form-group"><label>ID</label><input type="text" data-field="fixture_id" value=""></div>
+                        <div class="form-group form-group-wide"><label>Description</label><input type="text" data-field="description" value=""></div>
+                        <div class="form-group"><label>Qty</label><input type="number" min="1" data-field="quantity" value="1"></div>
+                    </div>
+                </div>
+                <div class="detail-section" data-component-section="fixture">
+                    <h4>Accessory <span class="approved-date-display" data-date-for="approved_date"></span></h4>
+                    <div class="field-row">
+                        <div class="form-group"><label>Part #</label><input type="text" data-field="part_no" value="" data-lockable="fixture"></div>
+                        <div class="form-group"><label>Dealer $</label><input type="number" step="0.01" inputmode="decimal" data-field="dealer_price" value="0" data-lockable="fixture"></div>
+                        <div class="form-group"><label>List $</label><input type="number" step="0.01" inputmode="decimal" data-field="list_price" value="0" data-lockable="fixture"></div>
+                        <div class="form-group"><label>Status</label>
+                            <select data-field="status" class="status-select">
+                                {% for s in status_options %}<option value="{{ s }}">{{ s or '—' }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="fixture-actions">
+                <button class="btn btn-secondary btn-sm" onclick="duplicateFixture(this)">Duplicate</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteFixture(this)">Delete</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Linear accessory template -->
+<template id="tpl-linear-accessory">
+    <div class="fixture-row" data-table="linear_accessories" data-id="__ID__">
+        <div class="fixture-summary" onclick="toggleExpand(this)">
+            <span class="drag-handle" title="Drag to reorder">&#9776;</span>
+            <span class="fixture-id-display">__FIXTURE_ID__</span>
+            <span class="fixture-desc-display">__DESCRIPTION__</span>
+            <span class="fixture-qty-display">Qty: __QTY__</span>
+            <div class="status-dots">
+                <span class="status-dot" data-component="fixture" title="Accessory"></span>
+            </div>
+            <span class="expand-icon">&#9660;</span>
+        </div>
+        <div class="fixture-detail">
+            <div class="detail-grid">
+                <div class="detail-section detail-section-basic">
+                    <h4>General</h4>
+                    <div class="field-row">
+                        <div class="form-group"><label>ID</label><input type="text" data-field="fixture_id" value=""></div>
+                        <div class="form-group form-group-wide"><label>Description</label><input type="text" data-field="description" value=""></div>
+                        <div class="form-group"><label>Qty</label><input type="number" min="1" data-field="quantity" value="1"></div>
+                    </div>
+                </div>
+                <div class="detail-section" data-component-section="fixture">
+                    <h4>Accessory <span class="approved-date-display" data-date-for="approved_date"></span></h4>
+                    <div class="field-row">
+                        <div class="form-group"><label>Part #</label><input type="text" data-field="part_no" value="" data-lockable="fixture"></div>
+                        <div class="form-group"><label>Dealer $</label><input type="number" step="0.01" inputmode="decimal" data-field="dealer_price" value="0" data-lockable="fixture"></div>
+                        <div class="form-group"><label>List $</label><input type="number" step="0.01" inputmode="decimal" data-field="list_price" value="0" data-lockable="fixture"></div>
+                        <div class="form-group"><label>Status</label>
+                            <select data-field="status" class="status-select">
+                                {% for s in status_options %}<option value="{{ s }}">{{ s or '—' }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="fixture-actions">
+                <button class="btn btn-secondary btn-sm" onclick="duplicateFixture(this)">Duplicate</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteFixture(this)">Delete</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Decorative accessory template -->
+<template id="tpl-decorative-accessory">
+    <div class="fixture-row" data-table="decorative_accessories" data-id="__ID__">
+        <div class="fixture-summary" onclick="toggleExpand(this)">
+            <span class="drag-handle" title="Drag to reorder">&#9776;</span>
+            <span class="fixture-id-display">__FIXTURE_ID__</span>
+            <span class="fixture-desc-display">__DESCRIPTION__</span>
+            <span class="fixture-qty-display">Qty: __QTY__</span>
+            <div class="status-dots">
+                <span class="status-dot" data-component="fixture" title="Accessory"></span>
+            </div>
+            <span class="expand-icon">&#9660;</span>
+        </div>
+        <div class="fixture-detail">
+            <div class="detail-grid">
+                <div class="detail-section detail-section-basic">
+                    <h4>General</h4>
+                    <div class="field-row">
+                        <div class="form-group"><label>ID</label><input type="text" data-field="fixture_id" value=""></div>
+                        <div class="form-group form-group-wide"><label>Description</label><input type="text" data-field="description" value=""></div>
+                        <div class="form-group"><label>Qty</label><input type="number" min="1" data-field="quantity" value="1"></div>
+                    </div>
+                </div>
                 <div class="detail-section" data-component-section="fixture">
                     <h4>Accessory <span class="approved-date-display" data-date-for="approved_date"></span></h4>
                     <div class="field-row">

@@ -44,7 +44,6 @@
                         <th>Module P/N</th>
                         <th>Trim P/N</th>
                         <th>Driver P/N</th>
-                        <th>Accessory P/N</th>
                         <th class="num">Qty</th>
                     </tr>
                 </thead>
@@ -62,7 +61,25 @@
                         <td>{{ f.module_part_no }}{% if f.module_approved_date %}<br><span class="approval-note">Approved {{ f.module_approved_date }}</span>{% endif %}</td>
                         <td>{{ f.trim_part_no }}{% if f.trim_approved_date %}<br><span class="approval-note">Approved {{ f.trim_approved_date }}</span>{% endif %}</td>
                         <td>{{ f.driver_part_no }}{% if f.driver_approved_date %}<br><span class="approval-note">Approved {{ f.driver_approved_date }}</span>{% endif %}</td>
-                        <td>{{ f.accessory_part_no }}{% if f.accessory_approved_date %}<br><span class="approval-note">Approved {{ f.accessory_approved_date }}</span>{% endif %}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.recessed_accessories %}
+        <div class="report-section">
+            <h2>Recessed Accessories</h2>
+            <table>
+                <thead><tr><th>ID</th><th>Description</th><th>Part #</th><th class="num">Qty</th></tr></thead>
+                <tbody>
+                    {% for f in project.recessed_accessories %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}{% if f.approved_date %}<br><span class="approval-note">Approved {{ f.approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.part_no }}</td>
                         <td class="num">{{ f.quantity }}</td>
                     </tr>
                     {% endfor %}
@@ -86,7 +103,6 @@
                         <th>Tape P/N</th>
                         <th>Driver P/N</th>
                         <th>Channel P/N</th>
-                        <th>Accessory P/N</th>
                         <th class="num">Qty</th>
                     </tr>
                 </thead>
@@ -102,7 +118,25 @@
                         <td>{{ f.tape_part_no }}{% if f.tape_approved_date %}<br><span class="approval-note">Approved {{ f.tape_approved_date }}</span>{% endif %}</td>
                         <td>{{ f.driver_part_no }}{% if f.driver_approved_date %}<br><span class="approval-note">Approved {{ f.driver_approved_date }}</span>{% endif %}</td>
                         <td>{{ f.channel_part_no }}{% if f.channel_approved_date %}<br><span class="approval-note">Approved {{ f.channel_approved_date }}</span>{% endif %}</td>
-                        <td>{{ f.accessory_part_no }}{% if f.accessory_approved_date %}<br><span class="approval-note">Approved {{ f.accessory_approved_date }}</span>{% endif %}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.linear_accessories %}
+        <div class="report-section">
+            <h2>Linear Accessories</h2>
+            <table>
+                <thead><tr><th>ID</th><th>Description</th><th>Part #</th><th class="num">Qty</th></tr></thead>
+                <tbody>
+                    {% for f in project.linear_accessories %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}{% if f.approved_date %}<br><span class="approval-note">Approved {{ f.approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.part_no }}</td>
                         <td class="num">{{ f.quantity }}</td>
                     </tr>
                     {% endfor %}
@@ -124,7 +158,6 @@
                         <th>Lamp Type</th>
                         <th class="num">Lamp Qty</th>
                         <th>Part #</th>
-                        <th>Accessory P/N</th>
                         <th class="num">Qty</th>
                     </tr>
                 </thead>
@@ -138,7 +171,25 @@
                         <td>{{ f.lamp_type }}</td>
                         <td class="num">{{ f.lamp_quantity }}</td>
                         <td>{{ f.part_no }}{% if f.approved_date %}<br><span class="approval-note">Approved {{ f.approved_date }}</span>{% endif %}</td>
-                        <td>{{ f.accessory_part_no }}{% if f.accessory_approved_date %}<br><span class="approval-note">Approved {{ f.accessory_approved_date }}</span>{% endif %}</td>
+                        <td class="num">{{ f.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% if project.decorative_accessories %}
+        <div class="report-section">
+            <h2>Decorative Accessories</h2>
+            <table>
+                <thead><tr><th>ID</th><th>Description</th><th>Part #</th><th class="num">Qty</th></tr></thead>
+                <tbody>
+                    {% for f in project.decorative_accessories %}
+                    <tr>
+                        <td class="id-col">{{ f.fixture_id }}</td>
+                        <td>{{ f.description }}{% if f.approved_date %}<br><span class="approval-note">Approved {{ f.approved_date }}</span>{% endif %}</td>
+                        <td>{{ f.part_no }}</td>
                         <td class="num">{{ f.quantity }}</td>
                     </tr>
                     {% endfor %}
