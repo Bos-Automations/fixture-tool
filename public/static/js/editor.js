@@ -278,7 +278,15 @@ async function duplicateFixture(btn) {
     const fixture = await res.json();
 
     // Determine list type from table name
-    const listType = table.replace('_fixtures', '');
+    const tableToListType = {
+        'recessed_fixtures': 'recessed',
+        'linear_fixtures': 'linear',
+        'decorative_fixtures': 'decorative',
+        'landscape_fixtures': 'landscape',
+        'landscape_transformers': 'transformer',
+        'landscape_accessories': 'accessory'
+    };
+    const listType = tableToListType[table] || table.replace('_fixtures', '');
     const newRow = buildFixtureRow(listType, fixture);
     // Insert after current row
     row.parentNode.insertBefore(newRow, row.nextSibling);
