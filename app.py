@@ -290,6 +290,19 @@ def api_delete_fixture(table, fixture_id):
     return jsonify({'ok': True})
 
 
+@app.route('/api/fixtures/<table>/reorder', methods=['POST'])
+@login_required
+def api_reorder_fixtures(table):
+    if table not in db.VALID_TABLES:
+        return jsonify({'error': 'Invalid fixture type'}), 400
+    data = request.get_json() or {}
+    order = data.get('order', [])
+    if not order:
+        return jsonify({'error': 'No order provided'}), 400
+    db.reorder_fixtures(table, order)
+    return jsonify({'ok': True})
+
+
 db.init_db()
 
 if __name__ == '__main__':

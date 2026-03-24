@@ -292,6 +292,31 @@ input[type="number"] { font-variant-numeric: tabular-nums; }
 .fixture-summary:hover { background: #f1f5f9; }
 .fixture-summary:active { background: #e2e8f0; }
 
+/* Drag handle */
+.drag-handle {
+    cursor: grab;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    padding: 0 2px;
+    flex-shrink: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+}
+.drag-handle:hover { opacity: 1; }
+.drag-handle:active { cursor: grabbing; }
+
+/* Drag states */
+.fixture-row.dragging {
+    opacity: 0.4;
+    border: 1px dashed var(--border);
+}
+.fixture-row.drag-over {
+    border-top: 3px solid var(--primary);
+    margin-top: -2px;
+}
+
 .fixture-id-display {
     font-weight: 700;
     font-size: 0.95rem;

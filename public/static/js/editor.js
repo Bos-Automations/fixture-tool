@@ -380,3 +380,189 @@ function initExistingFixtures() {
 }
 
 initExistingFixtures();
+
+// --- Drag and drop reordering ---
+let dragRow = null;
+
+function initDragAndDrop(row) {
+    const handle = row.querySelector('.drag-handle');
+    if (!handle) return;
+
+    // Prevent the handle click from toggling expand
+    handle.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+
+    // Make the row draggable when grabbed by the handle
+    handle.addEventListener('mousedown', function() {
+        row.setAttribute('draggable', 'true');
+    });
+
+    document.addEventListener('mouseup', function() {
+        row.removeAttribute('draggable');
+    });
+
+    row.addEventListener('dragstart', function(e) {
+        // Only allow drag if initiated from handle
+        if (!row.getAttribute('draggable')) {
+            e.preventDefault();
+            return;
+        }
+        dragRow = row;
+        row.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', '');
+    });
+
+    row.addEventListener('dragend', function() {
+        row.classList.remove('dragging');
+        row.removeAttribute('draggable');
+        clearDragOvers();
+        dragRow = null;
+    });
+
+    row.addEventListener('dragover', function(e) {
+        if (!dragRow || dragRow === row) return;
+        // Only allow reorder within the same list
+        if (dragRow.parentNode !== row.parentNode) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        clearDragOvers();
+        row.classList.add('drag-over');
+    });
+
+    row.addEventListener('dragleave', function() {
+        row.classList.remove('drag-over');
+    });
+
+    row.addEventListener('drop', function(e) {
+        e.preventDefault();
+        if (!dragRow || dragRow === row) return;
+        if (dragRow.parentNode !== row.parentNode) return;
+
+        const list = row.parentNode;
+        const rows = Array.from(list.children);
+        const dragIndex = rows.indexOf(dragRow);
+        const dropIndex = rows.indexOf(row);
+
+        if (dragIndex < dropIndex) {
+            list.insertBefore(dragRow, row.nextSibling);
+        } else {
+            list.insertBefore(dragRow, row);
+        }
+
+        clearDragOvers();
+        saveNewOrder(list);
+    });
+
+    // --- Touch support ---
+    let touchClone = null;
+    let touchStartY = 0;
+    let touchCurrentTarget = null;
+
+    handle.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dragRow = row;
+        touchStartY = e.touches[0].clientY;
+
+        // Create a visual clone
+        touchClone = row.cloneNode(true);
+        touchClone.style.cssText = 'position:fixed;z-index:1000;pointer-events:none;opacity:0.8;width:' +
+            row.offsetWidth + 'px;left:' + row.getBoundingClientRect().left + 'px;top:' +
+            row.getBoundingClientRect().top + 'px;box-shadow:0 4px 12px rgba(0,0,0,0.2);';
+        document.body.appendChild(touchClone);
+
+        row.classList.add('dragging');
+    }, { passive: false });
+
+    handle.addEventListener('touchmove', function(e) {
+        if (!dragRow || !touchClone) return;
+        e.preventDefault();
+
+        const touch = e.touches[0];
+        const deltaY = touch.clientY - touchStartY;
+        touchClone.style.top = (row.getBoundingClientRect().top + deltaY) + 'px';
+
+        // Find the element under the touch point
+        touchClone.style.display = 'none';
+        const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+        touchClone.style.display = '';
+
+        clearDragOvers();
+        if (elemBelow) {
+            const targetRow = elemBelow.closest('.fixture-row');
+            if (targetRow && targetRow !== dragRow && targetRow.parentNode === dragRow.parentNode) {
+                targetRow.classList.add('drag-over');
+                touchCurrentTarget = targetRow;
+            } else {
+                touchCurrentTarget = null;
+            }
+        }
+    }, { passive: false });
+
+    handle.addEventListener('touchend', function(e) {
+        if (!dragRow) return;
+        e.preventDefault();
+
+        if (touchCurrentTarget && touchCurrentTarget !== dragRow) {
+            const list = touchCurrentTarget.parentNode;
+            const rows = Array.from(list.children);
+            const dragIndex = rows.indexOf(dragRow);
+            const dropIndex = rows.indexOf(touchCurrentTarget);
+
+            if (dragIndex < dropIndex) {
+                list.insertBefore(dragRow, touchCurrentTarget.nextSibling);
+            } else {
+                list.insertBefore(dragRow, touchCurrentTarget);
+            }
+            saveNewOrder(list);
+        }
+
+        row.classList.remove('dragging');
+        clearDragOvers();
+        if (touchClone) {
+            touchClone.remove();
+            touchClone = null;
+        }
+        dragRow = null;
+        touchCurrentTarget = null;
+    }, { passive: false });
+}
+
+function clearDragOvers() {
+    document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+}
+
+async function saveNewOrder(list) {
+    const rows = Array.from(list.querySelectorAll('.fixture-row'));
+    if (rows.length === 0) return;
+
+    const table = rows[0].dataset.table;
+    const order = rows.map(r => parseInt(r.dataset.id));
+
+    showSaveStatus('Saving...', 'saving');
+    try {
+        const res = await fetch('/api/fixtures/' + table + '/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order: order })
+        });
+        if (!res.ok) throw new Error('Reorder failed');
+        showSaveStatus('Saved', 'saved');
+    } catch (e) {
+        showSaveStatus('Error saving', 'error');
+        console.error(e);
+    }
+}
+
+// Initialize drag on all existing rows
+document.querySelectorAll('.fixture-row').forEach(initDragAndDrop);
+
+// Patch buildFixtureRow to init drag on new rows
+const _origBuildFixtureRow = buildFixtureRow;
+buildFixtureRow = function(type, fixture) {
+    const row = _origBuildFixtureRow(type, fixture);
+    initDragAndDrop(row);
+    return row;
+};

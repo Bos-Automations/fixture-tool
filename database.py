@@ -470,6 +470,17 @@ def update_fixture(table, fixture_id, data):
     )
 
 
+def reorder_fixtures(table, order):
+    """Update sort_order for a list of fixture IDs. order is a list of fixture IDs in desired order."""
+    if table not in VALID_TABLES:
+        raise ValueError(f'Invalid table: {table}')
+    statements = []
+    for i, fixture_id in enumerate(order):
+        statements.append((f'UPDATE {table} SET sort_order = ? WHERE id = ?', [i, fixture_id]))
+    if statements:
+        _execute_batch(statements)
+
+
 def delete_fixture(table, fixture_id):
     if table not in VALID_TABLES:
         raise ValueError(f'Invalid table: {table}')
