@@ -55,7 +55,7 @@
                 </thead>
                 <tbody>
                     {% for f in project.recessed %}
-                    {% set unit = (f.housing_dealer_price or 0) + (f.module_dealer_price or 0) + (f.trim_dealer_price or 0) + (f.driver_dealer_price or 0) %}
+                    {% set unit = (f.housing_dealer_price or 0) + (f.module_dealer_price or 0) + (f.trim_dealer_price or 0) + (f.driver_dealer_price or 0) + (f.accessory_dealer_price or 0) %}
                     <tr class="fixture-header-row">
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }} &middot; {{ f.fixture_type }} &middot; {{ f.cct }} &middot; {{ f.control_type }}</td>
@@ -114,6 +114,18 @@
                         <td></td>
                     </tr>
                     {% endif %}
+                    {% if f.accessory_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Accessory</span></td>
+                        <td>{{ f.accessory_part_no }}</td>
+                        <td class="num">{{ f.accessory_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.accessory_status | lower | replace(' ', '-') }}">{{ f.accessory_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
@@ -138,7 +150,7 @@
                 </thead>
                 <tbody>
                     {% for f in project.linear %}
-                    {% set unit = (f.tape_dealer_price or 0) + (f.driver_dealer_price or 0) + (f.channel_dealer_price or 0) %}
+                    {% set unit = (f.tape_dealer_price or 0) + (f.driver_dealer_price or 0) + (f.channel_dealer_price or 0) + (f.accessory_dealer_price or 0) %}
                     <tr class="fixture-header-row">
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }} &middot; {{ f.cct }} &middot; {{ f.channel_type }} &middot; {{ f.control_type }}</td>
@@ -185,6 +197,18 @@
                         <td></td>
                     </tr>
                     {% endif %}
+                    {% if f.accessory_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Accessory</span></td>
+                        <td>{{ f.accessory_part_no }}</td>
+                        <td class="num">{{ f.accessory_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.accessory_status | lower | replace(' ', '-') }}">{{ f.accessory_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
@@ -199,28 +223,51 @@
                     <tr>
                         <th>ID</th>
                         <th>Description</th>
-                        <th>Type</th>
-                        <th>CCT</th>
-                        <th>Lamp</th>
+                        <th>Component</th>
+                        <th>Part Number</th>
+                        <th class="num">Price</th>
                         <th class="status-col">Status</th>
                         <th class="num">Qty</th>
-                        <th class="num">Dealer $</th>
                         <th class="num">Extended</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for f in project.decorative %}
-                    <tr>
+                    {% set unit = (f.dealer_price or 0) + (f.accessory_dealer_price or 0) %}
+                    <tr class="fixture-header-row">
                         <td class="id-col">{{ f.fixture_id }}</td>
-                        <td>{{ f.description }}</td>
-                        <td>{{ f.fixture_type }}</td>
-                        <td>{{ f.cct }}</td>
-                        <td>{{ f.lamp_type }} ({{ f.lamp_quantity }})</td>
-                        <td><span class="status-badge status-{{ f.status | lower | replace(' ', '-') }}">{{ f.status or '—' }}</span></td>
+                        <td>{{ f.description }} &middot; {{ f.fixture_type }} &middot; {{ f.cct }}</td>
+                        <td></td>
+                        <td></td>
+                        <td class="num">{{ unit | currency }}</td>
+                        <td></td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ f.dealer_price | currency }}</td>
-                        <td class="num">{{ ((f.dealer_price or 0) * (f.quantity or 1)) | currency }}</td>
+                        <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
                     </tr>
+                    {% if f.part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Fixture</span></td>
+                        <td>{{ f.part_no }}</td>
+                        <td class="num">{{ f.dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.status | lower | replace(' ', '-') }}">{{ f.status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if f.accessory_part_no %}
+                    <tr class="component-row">
+                        <td></td>
+                        <td></td>
+                        <td><span class="component-label">Accessory</span></td>
+                        <td>{{ f.accessory_part_no }}</td>
+                        <td class="num">{{ f.accessory_dealer_price | currency }}</td>
+                        <td><span class="status-badge status-{{ f.accessory_status | lower | replace(' ', '-') }}">{{ f.accessory_status or '—' }}</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>

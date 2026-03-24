@@ -30,21 +30,13 @@
                         <th>CCT</th>
                         <th>Control</th>
                         <th class="num">Qty</th>
-                        <th>Housing P/N</th>
-                        <th class="num">Housing $</th>
-                        <th>Module P/N</th>
-                        <th class="num">Module $</th>
-                        <th>Trim P/N</th>
-                        <th class="num">Trim $</th>
-                        <th>Driver P/N</th>
-                        <th class="num">Driver $</th>
                         <th class="num">Unit Total</th>
                         <th class="num">Extended</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for f in project.recessed %}
-                    {% set unit = (f.housing_list_price or 0) + (f.module_list_price or 0) + (f.trim_list_price or 0) + (f.driver_list_price or 0) %}
+                    {% set unit = (f.housing_list_price or 0) + (f.module_list_price or 0) + (f.trim_list_price or 0) + (f.driver_list_price or 0) + (f.accessory_list_price or 0) %}
                     <tr>
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }}</td>
@@ -52,14 +44,6 @@
                         <td>{{ f.cct }}</td>
                         <td>{{ f.control_type }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td>{{ f.housing_part_no }}</td>
-                        <td class="num">{{ f.housing_list_price | currency }}</td>
-                        <td>{{ f.module_part_no }}</td>
-                        <td class="num">{{ f.module_list_price | currency }}</td>
-                        <td>{{ f.trim_part_no }}</td>
-                        <td class="num">{{ f.trim_list_price | currency }}</td>
-                        <td>{{ f.driver_part_no }}</td>
-                        <td class="num">{{ f.driver_list_price | currency }}</td>
                         <td class="num">{{ unit | currency }}</td>
                         <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
                     </tr>
@@ -81,19 +65,13 @@
                         <th>Ch. Type</th>
                         <th>Control</th>
                         <th class="num">Qty</th>
-                        <th>Tape P/N</th>
-                        <th class="num">Tape $</th>
-                        <th>Driver P/N</th>
-                        <th class="num">Driver $</th>
-                        <th>Channel P/N</th>
-                        <th class="num">Channel $</th>
                         <th class="num">Unit Total</th>
                         <th class="num">Extended</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for f in project.linear %}
-                    {% set unit = (f.tape_list_price or 0) + (f.driver_list_price or 0) + (f.channel_list_price or 0) %}
+                    {% set unit = (f.tape_list_price or 0) + (f.driver_list_price or 0) + (f.channel_list_price or 0) + (f.accessory_list_price or 0) %}
                     <tr>
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }}</td>
@@ -101,12 +79,6 @@
                         <td>{{ f.channel_type }}</td>
                         <td>{{ f.control_type }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td>{{ f.tape_part_no }}</td>
-                        <td class="num">{{ f.tape_list_price | currency }}</td>
-                        <td>{{ f.driver_part_no }}</td>
-                        <td class="num">{{ f.driver_list_price | currency }}</td>
-                        <td>{{ f.channel_part_no }}</td>
-                        <td class="num">{{ f.channel_list_price | currency }}</td>
                         <td class="num">{{ unit | currency }}</td>
                         <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
                     </tr>
@@ -129,12 +101,13 @@
                         <th>Lamp</th>
                         <th class="num">Lamp Qty</th>
                         <th class="num">Qty</th>
-                        <th class="num">List $</th>
+                        <th class="num">Unit Total</th>
                         <th class="num">Extended</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for f in project.decorative %}
+                    {% set unit = (f.list_price or 0) + (f.accessory_list_price or 0) %}
                     <tr>
                         <td class="id-col">{{ f.fixture_id }}</td>
                         <td>{{ f.description }}</td>
@@ -143,8 +116,8 @@
                         <td>{{ f.lamp_type }}</td>
                         <td class="num">{{ f.lamp_quantity }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td class="num">{{ f.list_price | currency }}</td>
-                        <td class="num">{{ ((f.list_price or 0) * (f.quantity or 1)) | currency }}</td>
+                        <td class="num">{{ unit | currency }}</td>
+                        <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -165,14 +138,6 @@
                         <th>Wattage</th>
                         <th>Control</th>
                         <th class="num">Qty</th>
-                        <th>Mount P/N</th>
-                        <th class="num">Mount $</th>
-                        <th>Fixture P/N</th>
-                        <th class="num">Fixture $</th>
-                        <th>Lamp P/N</th>
-                        <th class="num">Lamp $</th>
-                        <th>Accessory P/N</th>
-                        <th class="num">Accessory $</th>
                         <th class="num">Unit Total</th>
                         <th class="num">Extended</th>
                     </tr>
@@ -188,14 +153,6 @@
                         <td>{{ f.wattage }}</td>
                         <td>{{ f.control_type }}</td>
                         <td class="num">{{ f.quantity }}</td>
-                        <td>{{ f.mount_part_no }}</td>
-                        <td class="num">{{ f.mount_list_price | currency }}</td>
-                        <td>{{ f.fixture_part_no }}</td>
-                        <td class="num">{{ f.fixture_list_price | currency }}</td>
-                        <td>{{ f.lamp_part_no }}</td>
-                        <td class="num">{{ f.lamp_list_price | currency }}</td>
-                        <td>{{ f.accessory_part_no }}</td>
-                        <td class="num">{{ f.accessory_list_price | currency }}</td>
                         <td class="num">{{ unit | currency }}</td>
                         <td class="num">{{ (unit * (f.quantity or 1)) | currency }}</td>
                     </tr>

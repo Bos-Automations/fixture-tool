@@ -157,20 +157,21 @@ def compute_totals(project, report_type):
     for f in project['recessed']:
         qty = f.get('quantity', 1) or 1
         line = 0
-        for comp in ['housing', 'module', 'trim', 'driver']:
+        for comp in ['housing', 'module', 'trim', 'driver', 'accessory']:
             line += float(f.get(f'{comp}_{price_key}', 0) or 0)
         subtotal += line * qty
 
     for f in project['linear']:
         qty = f.get('quantity', 1) or 1
         line = 0
-        for comp in ['tape', 'driver', 'channel']:
+        for comp in ['tape', 'driver', 'channel', 'accessory']:
             line += float(f.get(f'{comp}_{price_key}', 0) or 0)
         subtotal += line * qty
 
     for f in project['decorative']:
         qty = f.get('quantity', 1) or 1
         price = float(f.get(price_key, 0) or 0)
+        price += float(f.get(f'accessory_{price_key}', 0) or 0)
         subtotal += price * qty
 
     for f in project['landscape']:
