@@ -16,6 +16,12 @@ def require_dashboard_session():
     if request.path.startswith('/static/'):
         return None
 
+    # Allow requests proxied from the dashboard
+    proxy_secret = request.headers.get('x-ptech-proxy-secret')
+    if proxy_secret and proxy_secret == PTECH_SESSION_SECRET:
+        return None
+
+    # Validate JWT session cookie for direct access
     token = request.cookies.get('ptech_session')
     if not token or not PTECH_SESSION_SECRET:
         return redirect(DASHBOARD_LOGIN_URL)
