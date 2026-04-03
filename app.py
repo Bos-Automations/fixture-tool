@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, abort
+from flask import Flask, render_template, request, jsonify, redirect, url_for, abort, make_response
 from datetime import date, datetime
 import os
 import jwt
@@ -10,30 +10,45 @@ PTECH_SESSION_SECRET = os.environ.get('PTECH_SESSION_SECRET', '')
 DASHBOARD_LOGIN_URL = 'https://dashboard.ptech.la/login'
 
 
+def validate_token(token):
+    """Validate a JWT token. Returns True if valid."""
+    if not token or not PTECH_SESSION_SECRET:
+        return False
+    try:
+        jwt.decode(token, PTECH_SESSION_SECRET, algorithms=['HS256'])
+        return True
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return False
+
+
 @app.before_request
 def require_dashboard_session():
     # Skip auth check for static assets
     if request.path.startswith('/static/'):
         return None
 
-    # Allow requests proxied from the dashboard
-    proxy_secret = request.headers.get('x-ptech-proxy-secret')
-    if proxy_secret and proxy_secret == PTECH_SESSION_SECRET:
+    # Check for token in URL parameter (passed by dashboard iframe)
+    url_token = request.args.get('ptech_token')
+    if validate_token(url_token):
+        # Set a local cookie and redirect to clean URL (without token param)
+        from urllib.parse import urlencode, parse_qs, urlparse, urlunparse
+        parsed = urlparse(request.url)
+        params = parse_qs(parsed.query)
+        params.pop('ptech_token', None)
+        clean_query = urlencode(params, doseq=True)
+        clean_url = urlunparse(parsed._replace(query=clean_query))
+        resp = make_response(redirect(clean_url))
+        resp.set_cookie('ptech_session', url_token, httponly=True,
+                        secure=True, samesite='Lax', max_age=86400)
+        return resp
+
+    # Check for local session cookie
+    cookie_token = request.cookies.get('ptech_session')
+    if validate_token(cookie_token):
         return None
 
-    # Validate JWT session cookie for direct access
-    token = request.cookies.get('ptech_session')
-    if not token or not PTECH_SESSION_SECRET:
-        if request.headers.get('Sec-Fetch-Dest') == 'iframe':
-            abort(403)
-        return redirect(DASHBOARD_LOGIN_URL)
-
-    try:
-        jwt.decode(token, PTECH_SESSION_SECRET, algorithms=['HS256'])
-    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-        if request.headers.get('Sec-Fetch-Dest') == 'iframe':
-            abort(403)
-        return redirect(DASHBOARD_LOGIN_URL)
+    # Not authenticated
+    return redirect(DASHBOARD_LOGIN_URL)
 
 DECORATIVE_TYPES = [
     'Sconce', 'Chandelier', 'Pendant', 'Flush Mount', 'Semi-Flush',
