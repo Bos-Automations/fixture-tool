@@ -24,11 +24,15 @@ def require_dashboard_session():
     # Validate JWT session cookie for direct access
     token = request.cookies.get('ptech_session')
     if not token or not PTECH_SESSION_SECRET:
+        if request.headers.get('Sec-Fetch-Dest') == 'iframe':
+            abort(403)
         return redirect(DASHBOARD_LOGIN_URL)
 
     try:
         jwt.decode(token, PTECH_SESSION_SECRET, algorithms=['HS256'])
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        if request.headers.get('Sec-Fetch-Dest') == 'iframe':
+            abort(403)
         return redirect(DASHBOARD_LOGIN_URL)
 
 DECORATIVE_TYPES = [
