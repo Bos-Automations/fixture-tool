@@ -1,9 +1,29 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, abort
 from datetime import date, datetime
 import os
+import jwt
 import database as db
 
 app = Flask(__name__, static_folder='public/static')
+
+PTECH_SESSION_SECRET = os.environ.get('PTECH_SESSION_SECRET', '')
+DASHBOARD_LOGIN_URL = 'https://dashboard.ptech.la/login'
+
+
+@app.before_request
+def require_dashboard_session():
+    # Skip auth check for static assets
+    if request.path.startswith('/static/'):
+        return None
+
+    token = request.cookies.get('ptech_session')
+    if not token or not PTECH_SESSION_SECRET:
+        return redirect(DASHBOARD_LOGIN_URL)
+
+    try:
+        jwt.decode(token, PTECH_SESSION_SECRET, algorithms=['HS256'])
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return redirect(DASHBOARD_LOGIN_URL)
 
 DECORATIVE_TYPES = [
     'Sconce', 'Chandelier', 'Pendant', 'Flush Mount', 'Semi-Flush',
