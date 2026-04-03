@@ -1,28 +1,9 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session
-from functools import wraps
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from datetime import date, datetime
 import os
-import hashlib
 import database as db
 
 app = Flask(__name__, static_folder='public/static')
-app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-me')
-
-ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD_HASH = os.environ.get('ADMIN_PASSWORD_HASH', '')
-
-
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
-
-
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get('logged_in'):
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated
 
 DECORATIVE_TYPES = [
     'Sconce', 'Chandelier', 'Pendant', 'Flush Mount', 'Semi-Flush',
@@ -70,41 +51,15 @@ def currency_filter(value):
         return '$0.00'
 
 
-# --- Auth Routes ---
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if session.get('logged_in'):
-        return redirect(url_for('dashboard'))
-    error = None
-    if request.method == 'POST':
-        username = request.form.get('username', '')
-        password = request.form.get('password', '')
-        if username == ADMIN_USERNAME and hash_password(password) == ADMIN_PASSWORD_HASH:
-            session['logged_in'] = True
-            session.permanent = True
-            return redirect(url_for('dashboard'))
-        error = 'Invalid username or password'
-    return render_template('login.html', error=error)
-
-
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    return redirect(url_for('login'))
-
-
 # --- Page Routes ---
 
 @app.route('/')
-@login_required
 def dashboard():
     projects = db.get_all_projects()
     return render_template('dashboard.html', projects=projects)
 
 
 @app.route('/project/<int:project_id>')
-@login_required
 def project_editor(project_id):
     project = db.get_project(project_id)
     if not project:
@@ -121,7 +76,6 @@ def project_editor(project_id):
 
 
 @app.route('/project/<int:project_id>/report/<report_type>')
-@login_required
 def report(project_id, report_type):
     project = db.get_project(project_id)
     if not project:
@@ -140,7 +94,6 @@ def report(project_id, report_type):
 
 
 @app.route('/project/<int:project_id>/purchase-order')
-@login_required
 def purchase_order_page(project_id):
     project = db.get_project(project_id)
     if not project:
@@ -229,7 +182,6 @@ def compute_totals(project, report_type):
 # --- API Routes ---
 
 @app.route('/api/projects', methods=['POST'])
-@login_required
 def api_create_project():
     data = request.get_json() or {}
     name = data.get('name', 'New Project').strip()
@@ -241,7 +193,6 @@ def api_create_project():
 
 
 @app.route('/api/projects/<int:project_id>', methods=['PATCH'])
-@login_required
 def api_update_project(project_id):
     data = request.get_json() or {}
     db.update_project(project_id, data)
@@ -249,14 +200,12 @@ def api_update_project(project_id):
 
 
 @app.route('/api/projects/<int:project_id>', methods=['DELETE'])
-@login_required
 def api_delete_project(project_id):
     db.delete_project(project_id)
     return jsonify({'ok': True})
 
 
 @app.route('/api/projects/<int:project_id>/fixtures/<table>', methods=['POST'])
-@login_required
 def api_create_fixture(project_id, table):
     if table not in db.VALID_TABLES:
         return jsonify({'error': 'Invalid fixture type'}), 400
@@ -265,7 +214,6 @@ def api_create_fixture(project_id, table):
 
 
 @app.route('/api/fixtures/<table>/<int:fixture_id>/duplicate', methods=['POST'])
-@login_required
 def api_duplicate_fixture(table, fixture_id):
     if table not in db.VALID_TABLES:
         return jsonify({'error': 'Invalid fixture type'}), 400
@@ -276,7 +224,6 @@ def api_duplicate_fixture(table, fixture_id):
 
 
 @app.route('/api/fixtures/<table>/<int:fixture_id>', methods=['PATCH'])
-@login_required
 def api_update_fixture(table, fixture_id):
     if table not in db.VALID_TABLES:
         return jsonify({'error': 'Invalid fixture type'}), 400
@@ -297,7 +244,6 @@ def api_update_fixture(table, fixture_id):
 
 
 @app.route('/api/fixtures/<table>/<int:fixture_id>', methods=['DELETE'])
-@login_required
 def api_delete_fixture(table, fixture_id):
     if table not in db.VALID_TABLES:
         return jsonify({'error': 'Invalid fixture type'}), 400
@@ -306,7 +252,6 @@ def api_delete_fixture(table, fixture_id):
 
 
 @app.route('/api/fixtures/<table>/reorder', methods=['POST'])
-@login_required
 def api_reorder_fixtures(table):
     if table not in db.VALID_TABLES:
         return jsonify({'error': 'Invalid fixture type'}), 400
