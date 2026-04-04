@@ -48,7 +48,7 @@ def set_session_cookie(response):
     token = getattr(g, 'ptech_token', None)
     if token:
         response.set_cookie('ptech_session', token, httponly=True,
-                            secure=True, samesite='Lax', max_age=86400)
+                            secure=True, samesite='None', max_age=86400)
     return response
 
 DECORATIVE_TYPES = [
