@@ -48,7 +48,7 @@ def set_session_cookie(response):
     token = getattr(g, 'ptech_token', None)
     if token:
         response.set_cookie('ptech_session', token, httponly=True,
-                            secure=True, samesite='None', max_age=86400)
+                            secure=True, samesite='Lax', max_age=86400)
     return response
 
 DECORATIVE_TYPES = [
@@ -72,7 +72,7 @@ CHANNEL_TYPE_OPTIONS = [
 ]
 
 FIXTURE_COLORS = [
-    {'value': '', 'label': '\u2014', 'hex': 'transparent'},
+    {'value': '', 'label': '—', 'hex': 'transparent'},
     {'value': 'red', 'label': 'Red', 'hex': '#ef4444'},
     {'value': 'orange', 'label': 'Orange', 'hex': '#f97316'},
     {'value': 'yellow', 'label': 'Yellow', 'hex': '#eab308'},
