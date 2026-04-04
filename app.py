@@ -139,6 +139,11 @@ def report(project_id, report_type):
                            now=date.today().strftime('%B %d, %Y'))
 
 
+@app.route('/ninja-business')
+def ninja_business():
+    return render_template('ninja_business.html')
+
+
 @app.route('/project/<int:project_id>/purchase-order')
 def purchase_order_page(project_id):
     project = db.get_project(project_id)

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Ninja Business - PTech{% endblock %}
+
+{% block content %}
+<div class="ninja-business">
+    <div class="nb-header">
+        <h1>Ninja Business</h1>
+        <p class="nb-subtitle">Employment &amp; HR Resources</p>
+    </div>
+
+    <div class="nb-section">
+        <h2 class="nb-section-title">Tools</h2>
+        <div class="nb-grid">
+            <a href="https://github.com/ptechla/PTech-Self-Evaluation" target="_blank" class="nb-card">
+                <div class="nb-card-icon">&#128203;</div>
+                <div class="nb-card-body">
+                    <h3>Self Evaluation</h3>
+                    <p>Complete your PTech self-evaluation</p>
+                </div>
+                <span class="nb-card-arrow">&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="nb-section">
+        <h2 class="nb-section-title">Documents</h2>
+        <div class="nb-grid">
+            <div class="nb-card nb-card-doc">
+                <div class="nb-card-icon">&#128214;</div>
+                <div class="nb-card-body">
+                    <h3>Employee Manual</h3>
+                    <p>Company policies and guidelines</p>
+                </div>
+                <button class="btn btn-sm btn-secondary nb-toggle-doc" onclick="toggleDoc(this, 'employee-manual-frame')">View</button>
+            </div>
+            <div class="nb-doc-embed" id="employee-manual-frame" style="display:none;">
+                <iframe src="https://docs.google.com/document/d/1IwjzWvRR9pTMhbj3BgzWvGbgX1gw71F5qrsLNKyGZ2I/preview" width="100%" height="800" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleDoc(btn, frameId) {
+    const frame = document.getElementById(frameId);
+    const isVisible = frame.style.display !== 'none';
+    frame.style.display = isVisible ? 'none' : 'block';
+    btn.textContent = isVisible ? 'View' : 'Hide';
+}
+</script>
+{% endblock %}
