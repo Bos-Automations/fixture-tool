@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, abort, make_response
+from flask import Flask, render_template, request, jsonify, redirect, url_for, abort, make_response, g
 from datetime import date, datetime
 import os
 import jwt
@@ -30,17 +30,9 @@ def require_dashboard_session():
     # Check for token in URL parameter (passed by dashboard iframe)
     url_token = request.args.get('ptech_token')
     if validate_token(url_token):
-        # Set a local cookie and redirect to clean URL (without token param)
-        from urllib.parse import urlencode, parse_qs, urlparse, urlunparse
-        parsed = urlparse(request.url)
-        params = parse_qs(parsed.query)
-        params.pop('ptech_token', None)
-        clean_query = urlencode(params, doseq=True)
-        clean_url = urlunparse(parsed._replace(query=clean_query))
-        resp = make_response(redirect(clean_url))
-        resp.set_cookie('ptech_session', url_token, httponly=True,
-                        secure=True, samesite='Lax', max_age=86400)
-        return resp
+        # Store token — cookie will be set in after_request
+        g.ptech_token = url_token
+        return None
 
     # Check for local session cookie
     cookie_token = request.cookies.get('ptech_session')
@@ -49,6 +41,15 @@ def require_dashboard_session():
 
     # Not authenticated
     return redirect(DASHBOARD_LOGIN_URL)
+
+
+@app.after_request
+def set_session_cookie(response):
+    token = getattr(g, 'ptech_token', None)
+    if token:
+        response.set_cookie('ptech_session', token, httponly=True,
+                            secure=True, samesite='Lax', max_age=86400)
+    return response
 
 DECORATIVE_TYPES = [
     'Sconce', 'Chandelier', 'Pendant', 'Flush Mount', 'Semi-Flush',
