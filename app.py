@@ -1,55 +1,9 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, abort, make_response, g
+from flask import Flask, render_template, request, jsonify, redirect, url_for, abort, make_response
 from datetime import date, datetime
 import os
-import jwt
 import database as db
 
 app = Flask(__name__, static_folder='public/static')
-
-PTECH_SESSION_SECRET = os.environ.get('PTECH_SESSION_SECRET', '')
-DASHBOARD_LOGIN_URL = 'https://dashboard.ptech.la/login'
-
-
-def validate_token(token):
-    """Validate a JWT token. Returns True if valid."""
-    if not token or not PTECH_SESSION_SECRET:
-        return False
-    try:
-        jwt.decode(token, PTECH_SESSION_SECRET, algorithms=['HS256'])
-        return True
-    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-        return False
-
-
-@app.before_request
-def require_dashboard_session():
-    # Skip auth check for static assets
-    if request.path.startswith('/static/'):
-        return None
-
-    # Check for token in URL parameter (passed by dashboard iframe)
-    url_token = request.args.get('ptech_token')
-    if validate_token(url_token):
-        # Store token — cookie will be set in after_request
-        g.ptech_token = url_token
-        return None
-
-    # Check for local session cookie
-    cookie_token = request.cookies.get('ptech_session')
-    if validate_token(cookie_token):
-        return None
-
-    # Not authenticated
-    return redirect(DASHBOARD_LOGIN_URL)
-
-
-@app.after_request
-def set_session_cookie(response):
-    token = getattr(g, 'ptech_token', None)
-    if token:
-        response.set_cookie('ptech_session', token, httponly=True,
-                            secure=True, samesite='Lax', max_age=86400)
-    return response
 
 DECORATIVE_TYPES = [
     'Sconce', 'Chandelier', 'Pendant', 'Flush Mount', 'Semi-Flush',
