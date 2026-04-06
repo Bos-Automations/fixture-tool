@@ -5,18 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}Fixture Tool{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23E63946' rx='16' width='100' height='100'/><text x='50' y='70' font-family='sans-serif' font-size='52' font-weight='700' fill='white' text-anchor='middle'>FT</text></svg>">
     {% block head %}{% endblock %}
 </head>
 <body>
-    <nav class="top-nav">
-        <a href="/" class="nav-brand">Fixture Tool</a>
-        <div class="nav-right">
-            {% block nav_right %}{% endblock %}
-        </div>
-    </nav>
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
+    <div class="app-layout">
+        <!-- Mobile toggle -->
+        <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <a href="/" class="sidebar-brand">
+                <div class="sidebar-brand-icon">BA</div>
+                <div class="sidebar-brand-text">
+                    <span class="sidebar-brand-name">Fixture Tool</span>
+                    <span class="sidebar-brand-sub">Boston Automations</span>
+                </div>
+            </a>
+            <nav class="sidebar-nav">
+                <a href="/" class="sidebar-link {% block nav_dashboard %}{% endblock %}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                    Projects
+                </a>
+                {% block sidebar_extra %}{% endblock %}
+            </nav>
+            <div class="sidebar-footer">
+                {% block nav_right %}{% endblock %}
+                <span style="color: var(--text-muted); font-size: 11px;">&copy; Boston Automations</span>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main-content">
+            <div class="container">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

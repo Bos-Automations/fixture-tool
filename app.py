@@ -1,9 +1,39 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, abort, make_response
 from datetime import date, datetime
 import os
+import logging
 import database as db
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__, static_folder='public/static')
+
+
+# --- Global error handlers ---
+
+@app.errorhandler(404)
+def not_found(e):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Not found'}), 404
+    return redirect(url_for('dashboard'))
+
+
+@app.errorhandler(500)
+def server_error(e):
+    logger.error(f'Server error: {e}')
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Internal server error'}), 500
+    return render_template('error.html', error='Something went wrong. Please try again.'), 500
+
+
+@app.errorhandler(db.D1Error)
+def db_error(e):
+    logger.error(f'Database error: {e}')
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'Database error. Please try again.'}), 503
+    return redirect(url_for('dashboard'))
 
 DECORATIVE_TYPES = [
     'Sconce', 'Chandelier', 'Pendant', 'Flush Mount', 'Semi-Flush',

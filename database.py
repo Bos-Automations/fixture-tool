@@ -1,14 +1,23 @@
 import os
 import json
+import time
+import logging
 import urllib.request
 import urllib.error
 from dotenv import load_dotenv
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 CF_ACCOUNT_ID = os.environ.get('CF_ACCOUNT_ID', '')
 CF_API_TOKEN = os.environ.get('CF_API_TOKEN', '')
 CF_D1_DATABASE_ID = os.environ.get('CF_D1_DATABASE_ID', '')
+
+# D1 request settings
+D1_TIMEOUT = 15  # seconds
+D1_MAX_RETRIES = 3
+D1_RETRY_BACKOFF = 0.5  # seconds, doubles each retry
 
 VALID_TABLES = {'recessed_fixtures', 'linear_fixtures', 'decorative_fixtures',
                  'landscape_fixtures', 'landscape_transformers', 'landscape_accessories',
@@ -89,34 +98,68 @@ PROJECT_COLUMNS = {'name', 'address', 'parts_extras_pct', 'tax_pct', 'shipping_p
 
 # --- Cloudflare D1 REST API client ---
 
+class D1Error(Exception):
+    """Custom exception for D1 database errors."""
+    def __init__(self, message, status_code=None):
+        super().__init__(message)
+        self.status_code = status_code
+
+
 def _d1_query(sql, params=None):
+    """Execute a query against Cloudflare D1 with retry logic."""
+    if not CF_ACCOUNT_ID or not CF_API_TOKEN or not CF_D1_DATABASE_ID:
+        raise D1Error("Cloudflare D1 credentials not configured. Check CF_ACCOUNT_ID, CF_API_TOKEN, CF_D1_DATABASE_ID env vars.")
+
     url = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT_ID}/d1/database/{CF_D1_DATABASE_ID}/query"
     payload = {"sql": sql}
     if params:
         payload["params"] = params
     body = json.dumps(payload).encode()
-    req = urllib.request.Request(
-        url,
-        data=body,
-        headers={
-            "Authorization": f"Bearer {CF_API_TOKEN}",
-            "Content-Type": "application/json",
-        }
-    )
-    with urllib.request.urlopen(req) as resp:
-        data = json.loads(resp.read())
-    if not data.get("success"):
-        errors = data.get("errors", [])
-        msg = errors[0].get("message", "Unknown D1 error") if errors else "Unknown D1 error"
-        raise Exception(msg)
-    result = data["result"][0]
-    rows = result.get("results", [])
-    meta = result.get("meta", {})
-    return {
-        "rows": rows,
-        "last_insert_rowid": meta.get("last_row_id"),
-        "affected_row_count": meta.get("changes", 0),
-    }
+
+    last_error = None
+    for attempt in range(D1_MAX_RETRIES):
+        try:
+            req = urllib.request.Request(
+                url,
+                data=body,
+                headers={
+                    "Authorization": f"Bearer {CF_API_TOKEN}",
+                    "Content-Type": "application/json",
+                }
+            )
+            with urllib.request.urlopen(req, timeout=D1_TIMEOUT) as resp:
+                data = json.loads(resp.read())
+
+            if not data.get("success"):
+                errors = data.get("errors", [])
+                msg = errors[0].get("message", "Unknown D1 error") if errors else "Unknown D1 error"
+                raise D1Error(msg)
+
+            result = data["result"][0]
+            rows = result.get("results", [])
+            meta = result.get("meta", {})
+            return {
+                "rows": rows,
+                "last_insert_rowid": meta.get("last_row_id"),
+                "affected_row_count": meta.get("changes", 0),
+            }
+        except urllib.error.HTTPError as e:
+            last_error = e
+            status = e.code
+            # Don't retry client errors (4xx) except 429 (rate limit)
+            if 400 <= status < 500 and status != 429:
+                logger.error(f"D1 HTTP {status} error (non-retryable): {e.reason}")
+                raise D1Error(f"D1 API error: {status} {e.reason}", status_code=status)
+            logger.warning(f"D1 HTTP {status} error (attempt {attempt + 1}/{D1_MAX_RETRIES}): {e.reason}")
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            last_error = e
+            logger.warning(f"D1 connection error (attempt {attempt + 1}/{D1_MAX_RETRIES}): {e}")
+
+        if attempt < D1_MAX_RETRIES - 1:
+            wait = D1_RETRY_BACKOFF * (2 ** attempt)
+            time.sleep(wait)
+
+    raise D1Error(f"D1 query failed after {D1_MAX_RETRIES} attempts: {last_error}")
 
 
 def _execute(sql, args=None):
