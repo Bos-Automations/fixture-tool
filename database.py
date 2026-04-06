@@ -6,8 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TURSO_URL = os.environ.get('TURSO_DATABASE_URL', '')
-TURSO_AUTH_TOKEN = os.environ.get('TURSO_AUTH_TOKEN', '')
+CF_ACCOUNT_ID = os.environ.get('CF_ACCOUNT_ID', '')
+CF_API_TOKEN = os.environ.get('CF_API_TOKEN', '')
+CF_D1_DATABASE_ID = os.environ.get('CF_D1_DATABASE_ID', '')
 
 VALID_TABLES = {'recessed_fixtures', 'linear_fixtures', 'decorative_fixtures',
                  'landscape_fixtures', 'landscape_transformers', 'landscape_accessories',
@@ -86,341 +87,55 @@ TABLE_COLUMNS = {
 PROJECT_COLUMNS = {'name', 'address', 'parts_extras_pct', 'tax_pct', 'shipping_pct'}
 
 
-# --- Turso HTTP API client ---
+# --- Cloudflare D1 REST API client ---
 
-def _encode_arg(value):
-    if value is None:
-        return {"type": "null"}
-    elif isinstance(value, int):
-        return {"type": "integer", "value": str(value)}
-    elif isinstance(value, float):
-        return {"type": "float", "value": value}
-    elif isinstance(value, str):
-        return {"type": "text", "value": value}
-    else:
-        return {"type": "text", "value": str(value)}
-
-
-def _decode_value(val):
-    if val["type"] == "null":
-        return None
-    elif val["type"] == "integer":
-        return int(val["value"])
-    elif val["type"] == "float":
-        return float(val["value"])
-    elif val["type"] == "text":
-        return val["value"]
-    return val.get("value")
-
-
-def _execute(sql, args=None):
-    stmt = {"sql": sql}
-    if args:
-        stmt["args"] = [_encode_arg(a) for a in args]
-    body = json.dumps({
-        "requests": [
-            {"type": "execute", "stmt": stmt},
-            {"type": "close"}
-        ]
-    }).encode()
+def _d1_query(sql, params=None):
+    url = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT_ID}/d1/database/{CF_D1_DATABASE_ID}/query"
+    payload = {"sql": sql}
+    if params:
+        payload["params"] = params
+    body = json.dumps(payload).encode()
     req = urllib.request.Request(
-        f"{TURSO_URL}/v3/pipeline",
+        url,
         data=body,
         headers={
-            "Authorization": f"Bearer {TURSO_AUTH_TOKEN}",
+            "Authorization": f"Bearer {CF_API_TOKEN}",
             "Content-Type": "application/json",
         }
     )
     with urllib.request.urlopen(req) as resp:
         data = json.loads(resp.read())
-    result = data["results"][0]
-    if result["type"] == "error":
-        raise Exception(result["error"]["message"])
-    r = result["response"]["result"]
-    cols = [c["name"] for c in r["cols"]]
-    rows = []
-    for row in r["rows"]:
-        rows.append({cols[i]: _decode_value(v) for i, v in enumerate(row)})
+    if not data.get("success"):
+        errors = data.get("errors", [])
+        msg = errors[0].get("message", "Unknown D1 error") if errors else "Unknown D1 error"
+        raise Exception(msg)
+    result = data["result"][0]
+    rows = result.get("results", [])
+    meta = result.get("meta", {})
     return {
-        "columns": cols,
         "rows": rows,
-        "last_insert_rowid": int(r["last_insert_rowid"]) if r.get("last_insert_rowid") else None,
-        "affected_row_count": r.get("affected_row_count", 0),
+        "last_insert_rowid": meta.get("last_row_id"),
+        "affected_row_count": meta.get("changes", 0),
     }
 
 
+def _execute(sql, args=None):
+    return _d1_query(sql, args)
+
+
 def _execute_batch(statements):
-    requests = []
+    results = []
     for stmt in statements:
         if isinstance(stmt, str):
-            requests.append({"type": "execute", "stmt": {"sql": stmt}})
+            results.append(_d1_query(stmt))
         else:
             sql, args = stmt
-            requests.append({"type": "execute", "stmt": {"sql": sql, "args": [_encode_arg(a) for a in args]}})
-    requests.append({"type": "close"})
-    body = json.dumps({"requests": requests}).encode()
-    req = urllib.request.Request(
-        f"{TURSO_URL}/v3/pipeline",
-        data=body,
-        headers={
-            "Authorization": f"Bearer {TURSO_AUTH_TOKEN}",
-            "Content-Type": "application/json",
-        }
-    )
-    with urllib.request.urlopen(req) as resp:
-        data = json.loads(resp.read())
-    results = []
-    for r in data["results"][:-1]:  # skip the close response
-        if r["type"] == "error":
-            results.append({"error": r["error"]["message"]})
-        else:
-            res = r["response"]["result"]
-            cols = [c["name"] for c in res["cols"]]
-            rows = [{cols[i]: _decode_value(v) for i, v in enumerate(row)} for row in res["rows"]]
-            results.append({"columns": cols, "rows": rows,
-                            "last_insert_rowid": int(res["last_insert_rowid"]) if res.get("last_insert_rowid") else None})
+            results.append(_d1_query(sql, args))
     return results
 
 
-# --- Schema ---
-
-_CREATE_TABLES = [
-    """CREATE TABLE IF NOT EXISTS projects (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL DEFAULT '',
-        address TEXT DEFAULT '',
-        parts_extras_pct REAL DEFAULT 5.0,
-        tax_pct REAL DEFAULT 10.5,
-        shipping_pct REAL DEFAULT 4.0,
-        created_date TEXT DEFAULT (datetime('now','localtime')),
-        updated_date TEXT DEFAULT (datetime('now','localtime'))
-    )""",
-    """CREATE TABLE IF NOT EXISTS recessed_fixtures (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        project_id INTEGER NOT NULL,
-        fixture_id TEXT DEFAULT '',
-        description TEXT DEFAULT '',
-        housing_part_no TEXT DEFAULT '',
-        housing_dealer_price REAL DEFAULT 0,
-        housing_list_price REAL DEFAULT 0,
-        housing_status TEXT DEFAULT '',
-        housing_approved_date TEXT DEFAULT '',
-        module_part_no TEXT DEFAULT '',
-        module_dealer_price REAL DEFAULT 0,
-        module_list_price REAL DEFAULT 0,
-        module_status TEXT DEFAULT '',
-        module_approved_date TEXT DEFAULT '',
-        trim_part_no TEXT DEFAULT '',
-        trim_dealer_price REAL DEFAULT 0,
-        trim_list_price REAL DEFAULT 0,
-        trim_status TEXT DEFAULT '',
-        trim_approved_date TEXT DEFAULT '',
-        driver_part_no TEXT DEFAULT '',
-        driver_dealer_price REAL DEFAULT 0,
-        driver_list_price REAL DEFAULT 0,
-        driver_status TEXT DEFAULT '',
-        driver_approved_date TEXT DEFAULT '',
-        cct TEXT DEFAULT '',
-        beam_spread TEXT DEFAULT '',
-        fixture_type TEXT DEFAULT 'Fixed',
-        control_type TEXT DEFAULT '',
-        color TEXT DEFAULT '',
-        trim_style TEXT DEFAULT '',
-        trim_color TEXT DEFAULT '',
-        quantity INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0
-    )""",
-    """CREATE TABLE IF NOT EXISTS linear_fixtures (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        project_id INTEGER NOT NULL,
-        fixture_id TEXT DEFAULT '',
-        description TEXT DEFAULT '',
-        tape_part_no TEXT DEFAULT '',
-        tape_dealer_price REAL DEFAULT 0,
-        tape_list_price REAL DEFAULT 0,
-        tape_status TEXT DEFAULT '',
-        tape_approved_date TEXT DEFAULT '',
-        driver_part_no TEXT DEFAULT '',
-        driver_dealer_price REAL DEFAULT 0,
-        driver_list_price REAL DEFAULT 0,
-        driver_status TEXT DEFAULT '',
-        driver_approved_date TEXT DEFAULT '',
-        channel_part_no TEXT DEFAULT '',
-        channel_dealer_price REAL DEFAULT 0,
-        channel_list_price REAL DEFAULT 0,
-        channel_status TEXT DEFAULT '',
-        channel_approved_date TEXT DEFAULT '',
-        cct TEXT DEFAULT '',
-        channel_type TEXT DEFAULT '',
-        control_type TEXT DEFAULT '',
-        color TEXT DEFAULT '',
-        quantity INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0
-    )""",
-    """CREATE TABLE IF NOT EXISTS decorative_fixtures (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        project_id INTEGER NOT NULL,
-        fixture_id TEXT DEFAULT '',
-        description TEXT DEFAULT '',
-        fixture_type TEXT DEFAULT '',
-        lamp_type TEXT DEFAULT '',
-        lamp_quantity INTEGER DEFAULT 1,
-        cct TEXT DEFAULT '',
-        part_no TEXT DEFAULT '',
-        dealer_price REAL DEFAULT 0,
-        list_price REAL DEFAULT 0,
-        status TEXT DEFAULT '',
-        approved_date TEXT DEFAULT '',
-        quantity INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0
-    )""",
-    """CREATE TABLE IF NOT EXISTS landscape_fixtures (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        project_id INTEGER NOT NULL,
-        fixture_id TEXT DEFAULT '',
-        description TEXT DEFAULT '',
-        cct TEXT DEFAULT '',
-        beam_spread TEXT DEFAULT '',
-        fixture_type TEXT DEFAULT 'Fixed',
-        control_type TEXT DEFAULT '',
-        color TEXT DEFAULT '',
-        trim_style TEXT DEFAULT '',
-        trim_color TEXT DEFAULT '',
-        finish TEXT DEFAULT '',
-        wattage TEXT DEFAULT '',
-        mount_part_no TEXT DEFAULT '',
-        mount_dealer_price REAL DEFAULT 0,
-        mount_list_price REAL DEFAULT 0,
-        mount_status TEXT DEFAULT '',
-        mount_approved_date TEXT DEFAULT '',
-        fixture_part_no TEXT DEFAULT '',
-        fixture_dealer_price REAL DEFAULT 0,
-        fixture_list_price REAL DEFAULT 0,
-        fixture_status TEXT DEFAULT '',
-        fixture_approved_date TEXT DEFAULT '',
-        lamp_part_no TEXT DEFAULT '',
-        lamp_dealer_price REAL DEFAULT 0,
-        lamp_list_price REAL DEFAULT 0,
-        lamp_status TEXT DEFAULT '',
-        lamp_approved_date TEXT DEFAULT '',
-        accessory_part_no TEXT DEFAULT '',
-        accessory_dealer_price REAL DEFAULT 0,
-        accessory_list_price REAL DEFAULT 0,
-        accessory_status TEXT DEFAULT '',
-        accessory_approved_date TEXT DEFAULT '',
-        quantity INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0
-    )""",
-    """CREATE TABLE IF NOT EXISTS landscape_accessories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        project_id INTEGER NOT NULL,
-        fixture_id TEXT DEFAULT '',
-        description TEXT DEFAULT '',
-        part_no TEXT DEFAULT '',
-        dealer_price REAL DEFAULT 0,
-        list_price REAL DEFAULT 0,
-        status TEXT DEFAULT '',
-        approved_date TEXT DEFAULT '',
-        quantity INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0
-    )""",
-    """CREATE TABLE IF NOT EXISTS landscape_transformers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        project_id INTEGER NOT NULL,
-        fixture_id TEXT DEFAULT '',
-        description TEXT DEFAULT '',
-        wattage TEXT DEFAULT '',
-        control_type TEXT DEFAULT '',
-        part_no TEXT DEFAULT '',
-        dealer_price REAL DEFAULT 0,
-        list_price REAL DEFAULT 0,
-        status TEXT DEFAULT '',
-        approved_date TEXT DEFAULT '',
-        quantity INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0
-    )""",
-    """CREATE TABLE IF NOT EXISTS recessed_accessories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        project_id INTEGER NOT NULL,
-        fixture_id TEXT DEFAULT '',
-        description TEXT DEFAULT '',
-        part_no TEXT DEFAULT '',
-        dealer_price REAL DEFAULT 0,
-        list_price REAL DEFAULT 0,
-        status TEXT DEFAULT '',
-        approved_date TEXT DEFAULT '',
-        quantity INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0
-    )""",
-    """CREATE TABLE IF NOT EXISTS linear_accessories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        project_id INTEGER NOT NULL,
-        fixture_id TEXT DEFAULT '',
-        description TEXT DEFAULT '',
-        part_no TEXT DEFAULT '',
-        dealer_price REAL DEFAULT 0,
-        list_price REAL DEFAULT 0,
-        status TEXT DEFAULT '',
-        approved_date TEXT DEFAULT '',
-        quantity INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0
-    )""",
-    """CREATE TABLE IF NOT EXISTS decorative_accessories (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        project_id INTEGER NOT NULL,
-        fixture_id TEXT DEFAULT '',
-        description TEXT DEFAULT '',
-        part_no TEXT DEFAULT '',
-        dealer_price REAL DEFAULT 0,
-        list_price REAL DEFAULT 0,
-        status TEXT DEFAULT '',
-        approved_date TEXT DEFAULT '',
-        quantity INTEGER DEFAULT 1,
-        sort_order INTEGER DEFAULT 0
-    )""",
-]
-
-_MIGRATIONS = [
-    ('recessed_fixtures', 'housing_approved_date', "TEXT DEFAULT ''"),
-    ('recessed_fixtures', 'module_approved_date', "TEXT DEFAULT ''"),
-    ('recessed_fixtures', 'trim_approved_date', "TEXT DEFAULT ''"),
-    ('recessed_fixtures', 'driver_approved_date', "TEXT DEFAULT ''"),
-    ('linear_fixtures', 'tape_approved_date', "TEXT DEFAULT ''"),
-    ('linear_fixtures', 'driver_approved_date', "TEXT DEFAULT ''"),
-    ('linear_fixtures', 'channel_approved_date', "TEXT DEFAULT ''"),
-    ('linear_fixtures', 'channel_type', "TEXT DEFAULT ''"),
-    ('recessed_fixtures', 'color', "TEXT DEFAULT ''"),
-    ('linear_fixtures', 'color', "TEXT DEFAULT ''"),
-    ('decorative_fixtures', 'cct', "TEXT DEFAULT ''"),
-    ('decorative_fixtures', 'approved_date', "TEXT DEFAULT ''"),
-    ('recessed_fixtures', 'trim_style', "TEXT DEFAULT ''"),
-    ('recessed_fixtures', 'trim_color', "TEXT DEFAULT ''"),
-    ('decorative_fixtures', 'part_no', "TEXT DEFAULT ''"),
-    ('recessed_fixtures', 'accessory_part_no', "TEXT DEFAULT ''"),
-    ('recessed_fixtures', 'accessory_dealer_price', "REAL DEFAULT 0"),
-    ('recessed_fixtures', 'accessory_list_price', "REAL DEFAULT 0"),
-    ('recessed_fixtures', 'accessory_status', "TEXT DEFAULT ''"),
-    ('recessed_fixtures', 'accessory_approved_date', "TEXT DEFAULT ''"),
-    ('linear_fixtures', 'accessory_part_no', "TEXT DEFAULT ''"),
-    ('linear_fixtures', 'accessory_dealer_price', "REAL DEFAULT 0"),
-    ('linear_fixtures', 'accessory_list_price', "REAL DEFAULT 0"),
-    ('linear_fixtures', 'accessory_status', "TEXT DEFAULT ''"),
-    ('linear_fixtures', 'accessory_approved_date', "TEXT DEFAULT ''"),
-    ('decorative_fixtures', 'accessory_part_no', "TEXT DEFAULT ''"),
-    ('decorative_fixtures', 'accessory_dealer_price', "REAL DEFAULT 0"),
-    ('decorative_fixtures', 'accessory_list_price', "REAL DEFAULT 0"),
-    ('decorative_fixtures', 'accessory_status', "TEXT DEFAULT ''"),
-    ('decorative_fixtures', 'accessory_approved_date', "TEXT DEFAULT ''"),
-]
-
-
 def init_db():
-    _execute_batch(_CREATE_TABLES)
-    for table, column, col_type in _MIGRATIONS:
-        try:
-            _execute(f'ALTER TABLE {table} ADD COLUMN {column} {col_type}')
-        except Exception:
-            pass
+    pass
 
 
 # --- Project CRUD ---
@@ -483,9 +198,9 @@ def update_project(project_id, data):
 
 
 def delete_project(project_id):
-    stmts = [(f'DELETE FROM {table} WHERE project_id = ?', [project_id]) for table in VALID_TABLES]
-    stmts.append(('DELETE FROM projects WHERE id = ?', [project_id]))
-    _execute_batch(stmts)
+    for table in VALID_TABLES:
+        _execute(f'DELETE FROM {table} WHERE project_id = ?', [project_id])
+    _execute('DELETE FROM projects WHERE id = ?', [project_id])
 
 
 # --- Fixture CRUD ---
@@ -508,7 +223,6 @@ def create_fixture(table, project_id):
 
 
 def duplicate_fixture(table, fixture_id):
-    """Duplicate an existing fixture row, returning the new row."""
     if table not in VALID_TABLES:
         raise ValueError(f'Invalid table: {table}')
     result = _execute(f'SELECT * FROM {table} WHERE id = ?', [fixture_id])
@@ -550,14 +264,10 @@ def update_fixture(table, fixture_id, data):
 
 
 def reorder_fixtures(table, order):
-    """Update sort_order for a list of fixture IDs. order is a list of fixture IDs in desired order."""
     if table not in VALID_TABLES:
         raise ValueError(f'Invalid table: {table}')
-    statements = []
     for i, fixture_id in enumerate(order):
-        statements.append((f'UPDATE {table} SET sort_order = ? WHERE id = ?', [i, fixture_id]))
-    if statements:
-        _execute_batch(statements)
+        _execute(f'UPDATE {table} SET sort_order = ? WHERE id = ?', [i, fixture_id])
 
 
 def delete_fixture(table, fixture_id):
