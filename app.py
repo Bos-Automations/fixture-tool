@@ -15,8 +15,9 @@ app = Flask(__name__, static_folder='public/static')
 
 @app.errorhandler(404)
 def not_found(e):
-    if request.path.startswith('/api/'):
-        return jsonify({'error': 'Not found'}), 404
+    # Don't redirect static files — let them 404 naturally
+    if request.path.startswith('/api/') or request.path.startswith('/static/'):
+        return e
     return redirect(url_for('dashboard'))
 
 
@@ -25,7 +26,7 @@ def server_error(e):
     logger.error(f'Server error: {e}')
     if request.path.startswith('/api/'):
         return jsonify({'error': 'Internal server error'}), 500
-    return render_template('error.html', error='Something went wrong. Please try again.'), 500
+    return redirect(url_for('dashboard'))
 
 
 @app.errorhandler(db.D1Error)
